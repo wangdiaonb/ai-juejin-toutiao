@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-page-node-id="fgF62FUln0qzuPHM4mhBeW">
+<head data-page-node-id="rrWZ7HYeAG3OFOTppOQPQQ">
+<meta charset="UTF-8" data-page-node-id="A32P3bEfLbbDFtUdVr7KS5">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" data-page-node-id="yQ1m4rFBiK3ltzyw3btOXY">
+<title>toutiao_backend 项目架构说明文档</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f7f7f5;
+    --bg-code: #f4f4f2;
+    --text: #1f1f1e;
+    --text-2: #5f5e5a;
+    --text-3: #888780;
+    --line: #e5e4e0;
+    --line-strong: #d3d1c7;
+    --blue: #185fa5;
+    --blue-bg: #e6f1fb;
+    --teal: #0f6e56;
+    --teal-bg: #e1f5ee;
+    --amber: #854f0b;
+    --amber-bg: #faeeda;
+    --red: #a32d2d;
+    --red-bg: #fcebeb;
+    --green: #3b6d11;
+    --green-bg: #eaf3de;
+    --purple: #534ab7;
+    --purple-bg: #eeedfe;
+    --radius: 10px;
+    --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-size: 14px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 48px 32px 96px; }
+
+  header.hero { border-bottom: 2px solid var(--text); padding-bottom: 22px; margin-bottom: 34px; }
+  header.hero h1 { font-size: 26px; font-weight: 600; margin: 0 0 10px; letter-spacing: -0.3px; }
+  header.hero p { margin: 0; color: var(--text-2); font-size: 14px; }
+  .meta { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    display: inline-block; font-size: 12px; padding: 3px 10px; border-radius: 999px;
+    background: var(--bg-soft); border: 1px solid var(--line); color: var(--text-2);
+  }
+  .chip.b { background: var(--blue-bg); border-color: #b5d4f4; color: var(--blue); }
+  .chip.t { background: var(--teal-bg); border-color: #9fe1cb; color: var(--teal); }
+  .chip.a { background: var(--amber-bg); border-color: #fac775; color: var(--amber); }
+  .chip.p { background: var(--purple-bg); border-color: #cecbf6; color: var(--purple); }
+
+  h2 {
+    font-size: 19px; font-weight: 600; margin: 52px 0 16px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--line-strong); letter-spacing: -0.2px;
+  }
+  h2 .num {
+    display: inline-block; min-width: 26px; height: 26px; line-height: 26px; text-align: center;
+    background: var(--text); color: #fff; border-radius: 7px; font-size: 13px; margin-right: 10px;
+    vertical-align: 1px; font-weight: 500;
+  }
+  h3 { font-size: 15px; font-weight: 600; margin: 30px 0 10px; }
+  h4 { font-size: 13.5px; font-weight: 600; margin: 22px 0 8px; color: var(--text); }
+  p { margin: 10px 0; }
+  ul, ol { margin: 10px 0; padding-left: 22px; }
+  li { margin: 5px 0; }
+  code {
+    font-family: var(--mono); font-size: 12.5px; background: var(--bg-code);
+    padding: 1px 5px; border-radius: 4px; color: #b03a2e; border: 1px solid var(--line);
+  }
+  pre {
+    background: var(--bg-code); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 14px 16px; overflow-x: auto; margin: 12px 0; line-height: 1.6;
+  }
+  pre code { background: none; border: none; padding: 0; color: var(--text); font-size: 12.5px; }
+  .cmt { color: var(--text-3); }
+
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13px; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: var(--bg-soft); font-weight: 600; font-size: 12.5px; color: var(--text-2); white-space: nowrap; }
+  tbody tr:hover { background: #fafaf8; }
+  td.mono, th.mono { font-family: var(--mono); font-size: 12px; white-space: nowrap; }
+
+  .note {
+    border-left: 3px solid var(--blue); background: var(--blue-bg);
+    padding: 12px 16px; border-radius: 0 var(--radius) var(--radius) 0; margin: 16px 0;
+  }
+  .note.tip { border-color: var(--teal); background: var(--teal-bg); }
+  .note.warn { border-color: var(--amber); background: var(--amber-bg); }
+  .note.danger { border-color: var(--red); background: var(--red-bg); }
+  .note .lbl { font-weight: 600; font-size: 12.5px; display: block; margin-bottom: 3px; }
+  .note.tip .lbl { color: var(--teal); }
+  .note.warn .lbl { color: var(--amber); }
+  .note.danger .lbl { color: var(--red); }
+  .note .lbl { color: var(--blue); }
+  .note p:first-of-type { margin-top: 0; }
+  .note p:last-child { margin-bottom: 0; }
+
+  .toc { background: var(--bg-soft); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 22px; }
+  .toc ol { columns: 2; column-gap: 36px; margin: 0; padding-left: 20px; }
+  .toc li { margin: 3px 0; font-size: 13px; }
+  .toc a { color: var(--text-2); text-decoration: none; }
+  .toc a:hover { color: var(--blue); text-decoration: underline; }
+
+  .sev { display: inline-block; font-size: 11px; font-weight: 600; padding: 1px 7px; border-radius: 4px; margin-right: 8px; }
+  .sev.p0 { background: var(--red-bg); color: var(--red); }
+  .sev.p1 { background: var(--amber-bg); color: var(--amber); }
+  .sev.p2 { background: var(--green-bg); color: var(--green); }
+
+  .flow { border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; margin: 16px 0; background: #fcfcfb; }
+  .flow .step { display: flex; gap: 12px; padding: 9px 0; border-bottom: 1px dashed var(--line); }
+  .flow .step:last-child { border-bottom: none; }
+  .flow .n {
+    flex: 0 0 22px; height: 22px; border-radius: 50%; background: var(--blue); color: #fff;
+    font-size: 11.5px; text-align: center; line-height: 22px; margin-top: 3px; font-weight: 600;
+  }
+  .flow .body { flex: 1; }
+  .flow .body b { font-weight: 600; }
+  .flow .body .file { font-family: var(--mono); font-size: 12px; color: var(--blue); }
+  .flow .body .desc { color: var(--text-2); font-size: 13px; display: block; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin: 16px 0; }
+  .card { border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
+  .card h4 { margin: 0 0 6px; font-size: 13.5px; }
+  .card p { margin: 0; font-size: 12.5px; color: var(--text-2); }
+  .card .tag { font-family: var(--mono); font-size: 11.5px; color: var(--text-3); display: block; margin-bottom: 6px; }
+
+  figure { margin: 20px 0; }
+  figure svg { width: 100%; height: auto; display: block; }
+  figcaption { font-size: 12.5px; color: var(--text-3); text-align: center; margin-top: 8px; }
+
+  hr { border: none; border-top: 1px solid var(--line); margin: 40px 0 0; }
+  footer { margin-top: 26px; color: var(--text-3); font-size: 12.5px; }
+</style>
+</head>
+<body data-page-node-id="NZz7aVvnJkeVPQPeEmmSmE">
+<div class="wrap" data-page-node-id="DTU2eGsLXpQPpgkxh1ht1Z">
+
+<header class="hero" data-page-node-id="cwv4RiqRjYwA1SCNwNHjqf">
+  <h1 data-page-node-id="YapCSuJBdhSIwUV0axGmc4">toutiao_backend 项目架构说明文档</h1>
+  <p data-page-node-id="v8Cvh4ipaDkqDcV3ninFkL">一个基于 FastAPI + SQLAlchemy(异步) + MySQL + Redis 的新闻资讯后端，用于「AI 掘金头条」项目。</p>
+  <div class="meta" data-page-node-id="cCRrGNW1slk06jbtIYdSem">
+    <span class="chip b" data-page-node-id="wFldO5LVoXweT8ioIFzapc">FastAPI</span>
+    <span class="chip b" data-page-node-id="y3U7QDuAr3xBSp1CgKG25K">SQLAlchemy 2.0 异步</span>
+    <span class="chip t" data-page-node-id="kfjTlAi8mHoGWyAZXK5EFQ">aiomysql / MySQL</span>
+    <span class="chip t" data-page-node-id="GXv5UCIte2F4mdcnrshgIi">Redis 缓存</span>
+    <span class="chip p" data-page-node-id="Z0U8Gn7XNAJtbBd12DErEN">Pydantic v2</span>
+    <span class="chip p" data-page-node-id="v22LHv7bcExynVpO0u37EA">passlib + bcrypt</span>
+    <span class="chip a" data-page-node-id="JhJkJewoVMHjHO4oChnQWt">Uvicorn</span>
+  </div>
+</header>
+
+<nav class="toc" data-page-node-id="JVNugjHnZ4e1jvhXwReABH">
+  <ol data-page-node-id="123J09pg2ufD5nvSlavIdm">
+    <li data-page-node-id="dVZM0o5jrLmz6LKoHFH3ST"><a href="#s1" data-page-node-id="owRiPWilRgZ95zwMTlEmhQ">这个项目在做什么</a></li>
+    <li data-page-node-id="HFwJjDH0qvuaCvTiDy2fZC"><a href="#s2" data-page-node-id="Cc9wTBRFAM3tEPjN49oN02">分层架构与职责边界</a></li>
+    <li data-page-node-id="NuYZYxwueaZG1unMVWqDRM"><a href="#s3" data-page-node-id="VAYTPlQhin93SIrDvHRZ64">目录与文件总览</a></li>
+    <li data-page-node-id="vHqgnn7TkbmMof6DqD8J73"><a href="#s4" data-page-node-id="BQoFMWYUX8JFa7Po6GfG53">接口清单</a></li>
+    <li data-page-node-id="3E4KooEkhFfl7aHepVy8Cb"><a href="#s5" data-page-node-id="u8wHFu2osFs4bvswukO175">一次请求的完整旅程</a></li>
+    <li data-page-node-id="dDcGj80T3d7VytwWqdjHop"><a href="#s6" data-page-node-id="TMZRoCzmw5erLJhrzMiE2J">逐层逐文件详解</a></li>
+    <li data-page-node-id="nVbE4RUTRH8GN9ZgYQu6OU"><a href="#s7" data-page-node-id="WJVTkzh73E0LBjJpk4gdio">数据库表关系</a></li>
+    <li data-page-node-id="hrL2ROmmxjkcr1EMAkI61L"><a href="#s8" data-page-node-id="B6fNxxgujdUQpYpCsldmBC">四个核心运行机制</a></li>
+    <li data-page-node-id="ECzjGbY5LGAduTwWnRy7W8"><a href="#s9" data-page-node-id="jDRHcYTTOWpKaOdWTqsxFw">代码审阅：问题与改进建议</a></li>
+    <li data-page-node-id="y91pYQkG36uqXgDBX3OBcA"><a href="#s10" data-page-node-id="tG3pbNFbE2d3ienXLbJIXH">建议的阅读顺序</a></li>
+  </ol>
+</nav>
+
+<h2 id="s1" data-page-node-id="0TcD2RGN9SY1EAAD7v80to"><span class="num" data-page-node-id="2UGcRtvtipdiIBw5tyRQRe">1</span>这个项目在做什么</h2>
+
+<p data-page-node-id="gUdaM43591RVjUAyYn5fwe">一句话概括：<strong data-page-node-id="mb3UD6dcCC9RSm3bOJZbCL">一个给「新闻资讯类 App」提供数据的后端服务</strong>。它对外提供 HTTP 接口，负责用户注册登录、新闻分类与列表、新闻详情与相关推荐、收藏、浏览历史这几块业务；对内把数据存在 MySQL 里，把热点数据缓存到 Redis 里。</p>
+
+<p data-page-node-id="j75ixNvB0uBh2tJ4pAFD8n">它的代码非常典型地体现了「分层架构」这一套工程习惯。你把它吃透，以后看任何一个 FastAPI 项目都能快速定位代码位置。</p>
+
+<h3 data-page-node-id="48rvGwNWcCACqQ2uBOxxck">技术栈与各组件分工</h3>
+<table data-page-node-id="C0zZyRD9xsvP8d0EtaqnjD">
+  <thead data-page-node-id="6L51wHqAbzvHjBnjQZnvNh"><tr data-page-node-id="uUiWCx4HHa2ApVtM5U6cvG"><th style="width:150px" data-page-node-id="AzZOEq0b4H9bf3RK9K3Rv6">组件</th><th data-page-node-id="28GHif2S4NFiBhc75lCRbj">在这个项目里干什么</th></tr></thead>
+  <tbody data-page-node-id="XKRSh4uSR6IfhadI0tGCse">
+    <tr data-page-node-id="PondUCuql8LAr2AQsZLjjU"><td class="mono" data-page-node-id="4IFhKR0hcKQx3PYvGAtuI1">FastAPI</td><td data-page-node-id="6GX5FX4cKygQNxxczSbXL3">Web 框架。负责接收 HTTP 请求、做参数校验、生成接口文档（访问 <code data-page-node-id="CYnycKCODNdjSy5nzeU5Ia">/docs</code>）、注入依赖。</td></tr>
+    <tr data-page-node-id="SOkqaYkVGUupibWmKghtKK"><td class="mono" data-page-node-id="A0ZygtEGGGDY5BS7tLg6SF">Uvicorn</td><td data-page-node-id="kqR94Et4ba1qWDwwabsuxY">ASGI 服务器，真正把服务跑起来的进程。<code data-page-node-id="sNA7vKYBMGOzMDJZlZh1c6">uvicorn main:app --reload</code> 就是启动它。</td></tr>
+    <tr data-page-node-id="0PauHKtsDqlV9My1CCGeD3"><td class="mono" data-page-node-id="R8WGAuHz7C25btDApbnsST">SQLAlchemy 2.0</td><td data-page-node-id="UyQQZOX2kxysm5NkBiEfLt">ORM 框架。用 Python 类来描述数据库表，用 Python 对象来增删改查，避免手写 SQL 字符串。</td></tr>
+    <tr data-page-node-id="uWB16sMsBQ2zoWphcVwPZB"><td class="mono" data-page-node-id="zBxpG3mhoSHLHRmGidI8E9">aiomysql</td><td data-page-node-id="FXs6NaVkUhSoQr1GT09RK4">MySQL 的<strong data-page-node-id="vlorH4GqKaGgfYEzT0h5VL">异步</strong>驱动。SQLAlchemy 通过它把异步的 ORM 操作翻译成 MySQL 能听懂的协议。</td></tr>
+    <tr data-page-node-id="fV6Q1MXpBvUWZNkTfWX4xq"><td class="mono" data-page-node-id="e4nWaoOwi3iTkSM4cF4cnt">Pydantic v2</td><td data-page-node-id="ThPyGFmgJXvyOPUhFmagTI">数据契约。校验前端传来的 JSON 是否合法，同时规定返回给前端的数据长什么样。</td></tr>
+    <tr data-page-node-id="eIx2GfGsqm72O0H3P7C9zA"><td class="mono" data-page-node-id="3zRUtH0eZayIYPZm2T109I">redis.asyncio</td><td data-page-node-id="IqDmuxzHY6oYOHgka1mWcP">异步 Redis 客户端，做旁路缓存，减少数据库压力。</td></tr>
+    <tr data-page-node-id="BsEtWTqhDQoY9dErz0zdmd"><td class="mono" data-page-node-id="CLsPe3CXgOBfslqvRgYVCC">passlib + bcrypt</td><td data-page-node-id="b8o4ijkF7FhCRc8uL74hVj">密码哈希。绝不存明文密码，只存不可逆的 bcrypt 哈希串。</td></tr>
+  </tbody>
+</table>
+
+<h2 id="s2" data-page-node-id="BWCGfJ0Sr6vT7IVrYNAXW7"><span class="num" data-page-node-id="gvCwbDh0BvHP1AucHWen7D">2</span>分层架构与职责边界</h2>
+
+<p data-page-node-id="2KR3hbgECfr8mMrlnnrmhj">这个项目最核心的一条设计原则是：<strong data-page-node-id="HZx8ZcnaJYsBmNRFoUdX8a">每一层只做一件事，且只和相邻层打交道</strong>。请求像水流一样自上而下穿过各层，绝不允许「跨层抄近道」（比如在路由函数里直接写 SQL）。</p>
+
+<figure data-page-node-id="qhDTen9ChzKSO0UwQ2YGZB">
+<svg viewBox="0 0 680 470" xmlns="http://www.w3.org/2000/svg" style="font-family:inherit" data-page-node-id="RZtDWagbrrZW0KLzFYgyx5">
+  <defs data-page-node-id="DZeVmrcA6hHYWfGT6dqyhH">
+    <marker id="ar2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse" data-page-node-id="z7OYXytWk2fidRNL5N6OE1">
+      <path d="M2 1L8 5L2 9" fill="none" stroke="#888780" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" data-page-node-id="qBrTS8zYBof7vuLtSg6m1C"/>
+    </marker>
+  </defs>
+
+  <text x="50" y="18" font-size="12" fill="#185fa5" data-page-node-id="knDgU4p879ALUMU6f3nXRD">请求处理主链路（自上而下）</text>
+  <text x="440" y="18" font-size="12" fill="#5f5e5a" data-page-node-id="NsoC6Cw2zxV5UcjMBbhWsW">支撑模块（被各层复用）</text>
+
+  <rect x="50" y="30" width="360" height="56" rx="10" fill="#f1efe8" stroke="#5f5e5a" stroke-width="0.5" data-page-node-id="ifaKg9vgtageoaFG5BlZF2"/>
+  <text x="230" y="52" text-anchor="middle" font-size="14" font-weight="600" fill="#2c2c2a" data-page-node-id="5edMUK1VJhXvu6xCocOQUj">客户端 / 浏览器</text>
+  <text x="230" y="71" text-anchor="middle" font-size="12" fill="#5f5e5a" data-page-node-id="qQsYJIreBsVQluDAayoTaS">发起 HTTP 请求，带 Authorization 头</text>
+  <line x1="230" y1="88" x2="230" y2="106" stroke="#888780" stroke-width="1.5" marker-end="url(#ar2)" data-page-node-id="KNvhYWqG5dsRsqcZugXMwW"/>
+
+  <rect x="50" y="108" width="360" height="56" rx="10" fill="#e6f1fb" stroke="#185fa5" stroke-width="0.5" data-page-node-id="tNcIisBKR5WfDgtVFSnRcv"/>
+  <text x="230" y="130" text-anchor="middle" font-size="14" font-weight="600" fill="#042c53" data-page-node-id="zcsfQpKEgQsCxFBKTJCRKr">routers/ 路由层</text>
+  <text x="230" y="149" text-anchor="middle" font-size="12" fill="#185fa5" data-page-node-id="2K3FkRNH5SxlOQNroaBZyB">接请求 · 依赖注入 · 拼响应</text>
+  <line x1="230" y1="166" x2="230" y2="184" stroke="#888780" stroke-width="1.5" marker-end="url(#ar2)" data-page-node-id="qg3CweEZqd2H15s9DuXsuN"/>
+
+  <rect x="50" y="186" width="360" height="56" rx="10" fill="#e6f1fb" stroke="#185fa5" stroke-width="0.5" data-page-node-id="Xh1YNQow5qJpZEOTQtLJm6"/>
+  <text x="230" y="208" text-anchor="middle" font-size="14" font-weight="600" fill="#042c53" data-page-node-id="Mc45HfhcWRIC0ztd3w9yZm">crud/ 数据访问层</text>
+  <text x="230" y="227" text-anchor="middle" font-size="12" fill="#185fa5" data-page-node-id="aNfoyzAn08pHw3Mcmx74F4">只拼 SQL，不关心 HTTP</text>
+  <line x1="230" y1="244" x2="230" y2="262" stroke="#888780" stroke-width="1.5" marker-end="url(#ar2)" data-page-node-id="GSI1X6t6rZucGNonnW0zeN"/>
+
+  <rect x="50" y="264" width="360" height="56" rx="10" fill="#e6f1fb" stroke="#185fa5" stroke-width="0.5" data-page-node-id="5hTBAIz1dB7jTEgEsD0WqW"/>
+  <text x="230" y="286" text-anchor="middle" font-size="14" font-weight="600" fill="#042c53" data-page-node-id="o7oHuS8mwcvxAcqsBef0h5">models/ ORM 模型</text>
+  <text x="230" y="305" text-anchor="middle" font-size="12" fill="#185fa5" data-page-node-id="jUJm0xeyvqsFJVp1xshHl4">Python 类映射数据库表</text>
+  <line x1="230" y1="322" x2="230" y2="340" stroke="#888780" stroke-width="1.5" marker-end="url(#ar2)" data-page-node-id="bbA8hWXdFuAe1ECN8hfKlB"/>
+
+  <rect x="50" y="342" width="360" height="56" rx="10" fill="#f1efe8" stroke="#5f5e5a" stroke-width="0.5" data-page-node-id="RWOfaVkTd9M8pciFto7taR"/>
+  <text x="230" y="364" text-anchor="middle" font-size="14" font-weight="600" fill="#2c2c2a" data-page-node-id="ttIr916MA1djVvor1Y56vi">MySQL ／ Redis</text>
+  <text x="230" y="383" text-anchor="middle" font-size="12" fill="#5f5e5a" data-page-node-id="UkBSnQlA1VHGP48oQBiuaN">数据最终落在这里</text>
+
+  <rect x="440" y="108" width="190" height="56" rx="10" fill="#f1efe8" stroke="#5f5e5a" stroke-width="0.5" data-page-node-id="8zRvFtB7BbJPTycs4Xk3Y0"/>
+  <text x="535" y="130" text-anchor="middle" font-size="14" font-weight="600" fill="#2c2c2a" data-page-node-id="xOc1bCHbaZuD8PBG8BDqi9">schemas/ 数据契约</text>
+  <text x="535" y="149" text-anchor="middle" font-size="12" fill="#5f5e5a" data-page-node-id="ECtCK55BTPgqCtNQRjLDb0">入参校验 · 出参序列化</text>
+  <line x1="440" y1="136" x2="414" y2="136" stroke="#888780" stroke-width="0.5" stroke-dasharray="3 3" data-page-node-id="rFxT0uTH4KuckyVqvmA8i5"/>
+
+  <rect x="440" y="186" width="190" height="56" rx="10" fill="#f1efe8" stroke="#5f5e5a" stroke-width="0.5" data-page-node-id="MdtAFvNhy8TkZdDUfCYCNv"/>
+  <text x="535" y="208" text-anchor="middle" font-size="14" font-weight="600" fill="#2c2c2a" data-page-node-id="aDzC19gZFwQe9v9MF8MmN8">utils/ 工具集</text>
+  <text x="535" y="227" text-anchor="middle" font-size="12" fill="#5f5e5a" data-page-node-id="DtqltoI84CBl3WBwBKMhUY">认证 · 加密 · 响应 · 异常</text>
+  <line x1="440" y1="214" x2="414" y2="214" stroke="#888780" stroke-width="0.5" stroke-dasharray="3 3" data-page-node-id="FIKKOekCIjXjhi0mFpYs8J"/>
+
+  <rect x="440" y="264" width="190" height="56" rx="10" fill="#f1efe8" stroke="#5f5e5a" stroke-width="0.5" data-page-node-id="rlN0g3Mkd7GHEb2Oud3bjr"/>
+  <text x="535" y="286" text-anchor="middle" font-size="14" font-weight="600" fill="#2c2c2a" data-page-node-id="wGoIKGba4GU5A3WEXIPTTW">config/ 基础设施</text>
+  <text x="535" y="305" text-anchor="middle" font-size="12" fill="#5f5e5a" data-page-node-id="ZYNRhg6aYpxRwdcB7jV7wj">引擎与会话 · Redis 连接</text>
+  <line x1="440" y1="292" x2="414" y2="292" stroke="#888780" stroke-width="0.5" stroke-dasharray="3 3" data-page-node-id="93qgTXGVJPoIMp0znEZ0ia"/>
+
+  <rect x="440" y="342" width="190" height="56" rx="10" fill="#f1efe8" stroke="#5f5e5a" stroke-width="0.5" data-page-node-id="Jww4DsQikcGBfFWc8nI3uU"/>
+  <text x="535" y="364" text-anchor="middle" font-size="14" font-weight="600" fill="#2c2c2a" data-page-node-id="vVsZzHu9dfMTGp1M53VM32">cache/ 缓存策略</text>
+  <text x="535" y="383" text-anchor="middle" font-size="12" fill="#5f5e5a" data-page-node-id="YwUrIcPB9t8yIvoVVLi7u5">拼 key · 旁路缓存读写</text>
+  <line x1="440" y1="370" x2="414" y2="370" stroke="#888780" stroke-width="0.5" stroke-dasharray="3 3" data-page-node-id="NRmgaDKsUahjFevtLW1hcP"/>
+
+  <text x="50" y="432" font-size="12" fill="#888780" data-page-node-id="OpSIVUOaO4c673HdJqPCJE">依赖方向始终单向：上层可以直接用下层，下层绝不能反向 import 上层。</text>
+  <text x="50" y="452" font-size="12" fill="#888780" data-page-node-id="Ahok1yOWOHUPgM9L7JOrkO">唯一的例外是 crud/news_cache.py 会反向用到 schemas/news.py 做序列化。</text>
+</svg>
+<figcaption data-page-node-id="eM956AknRHUPS6VdcuZRKy">图 1 · 分层架构与依赖方向</figcaption>
+</figure>
+
+<h3 data-page-node-id="SVXAo7L2gJKjDDiVzd2Xi2">各层职责与「红线」</h3>
+<table data-page-node-id="X9AN45vKqBmw5jskDkXVkC">
+  <thead data-page-node-id="dfOfjYnZfH7lvX5HXMnP8V"><tr data-page-node-id="RyLgfaqhaQ7tz5dq1iUYM1"><th style="width:110px" data-page-node-id="LvEXrXizryWHYW0yjW5R3A">层</th><th style="width:210px" data-page-node-id="7O7JHPeUTdIfeQHhJhIiaB">该做的事</th><th data-page-node-id="sLXy0ijCFlK1pRWMczKpoC">绝对不该做的事（红线）</th></tr></thead>
+  <tbody data-page-node-id="sliJlLlSCXkxZzxiMgGq4B">
+    <tr data-page-node-id="E9fUArMy2bGKDfVZZ7wUuv">
+      <td class="mono" data-page-node-id="K4Fo3t7DdP2q9EGya6wqAl">routers/</td>
+      <td data-page-node-id="S6yovoFkLirt3rtMNp777f">定义 URL、声明依赖（<code data-page-node-id="wO9SdZATxlpDD5s6cLfpKx">Depends</code>）、调 crud、按统一格式返回</td>
+      <td data-page-node-id="I5wiqBa1KhT46OAOyiFUka">不写 SQL，不做密码加密，不直接操作 <code data-page-node-id="PxwsNFBune8PjozBjpp0um">db.execute()</code></td>
+    </tr>
+    <tr data-page-node-id="ZnrfvgAo6OIs01uCQ8rQpd">
+      <td class="mono" data-page-node-id="gd2BgjFEvAYHh3x5ICIa4G">crud/</td>
+      <td data-page-node-id="H3Jdd8ngPCBjUzIqMrSt1b">拼 SQL、执行增删改查、返回数据（ORM 对象或 dict）</td>
+      <td data-page-node-id="kViCIoCl1TTKGjZ90gvkQd">不接 HTTP 请求，不拼 <code data-page-node-id="P5u8g8LOTnLYM2f0aWbX1F">{code, message, data}</code> 响应格式，不知道 URL 是什么</td>
+    </tr>
+    <tr data-page-node-id="G7pKsJhK73lXgPKyb7fhL8">
+      <td class="mono" data-page-node-id="mD8DCCH5MEwtwwZNZKRBaO">models/</td>
+      <td data-page-node-id="VmBjyg9P5ZvA5yLCzZjeS9">用类描述表结构：字段、类型、索引、外键、默认值</td>
+      <td data-page-node-id="V2OPsjoPH63Pj34S8mXMI1">不写业务逻辑，不做查询</td>
+    </tr>
+    <tr data-page-node-id="X1cWsNR6CbcR6KGsEAniYg">
+      <td class="mono" data-page-node-id="a74Mha2h3QCUYxw6gJgOaU">schemas/</td>
+      <td data-page-node-id="vHomet1VyqnTZF4TylpFQ5">定义接口收发的数据结构，做字段校验与类型转换</td>
+      <td data-page-node-id="8TMYRsYc2kPEWZtEFRX4z9">不碰数据库，不含 ORM 映射</td>
+    </tr>
+    <tr data-page-node-id="1a1qt4nqYVfwwAkQmkbfvE">
+      <td class="mono" data-page-node-id="L1Z7RdY34XKSHcu0aGXQhP">cache/</td>
+      <td data-page-node-id="HoZfLIqokiRVhFzsRHcdbb">设计缓存 key、决定过期时间、调用底层 Redis 读写</td>
+      <td data-page-node-id="BCjFzrohUqT9D9IJ7q1zh5">不直接连 Redis（那是 <code data-page-node-id="noUtDaWVwWBABfO76FPL5N">config/cache_conf.py</code> 的活）</td>
+    </tr>
+    <tr data-page-node-id="CGMiU9eBZcI60UBz6lUxsA">
+      <td class="mono" data-page-node-id="pvfNODCUAog9loVBEDFFM6">config/</td>
+      <td data-page-node-id="K9Flb7dPsyMmp6fVNDNtdN">创建引擎、会话工厂、Redis 客户端这类全局基础设施</td>
+      <td data-page-node-id="bulsmgHVnHDZFMATUUsFY3">不含任何业务判断</td>
+    </tr>
+    <tr data-page-node-id="xy25792342FUTXleWylIAy">
+      <td class="mono" data-page-node-id="zXV1aqf3LBrUMGtZWNzteB">utils/</td>
+      <td data-page-node-id="TfF2vD7HGAk3taAm4gzVUG">跨层复用的纯工具：加密、认证依赖、响应封装、异常处理</td>
+      <td data-page-node-id="FH2tTwD7B0Jx3N1QqMufsf">不引入 routers 等上层模块（避免循环依赖）</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="note tip" data-page-node-id="NBwUQy3UapMAxfEGrQWPjQ">
+  <span class="lbl" data-page-node-id="0wHg8xvBHvUIlH9XpJ28kB">为什么要这样分层？</span>
+  <p data-page-node-id="WtCk4z7DwYrF27oryi1Bq6">假设某天新闻列表的查询要加一个「只出已审核的」条件。分层的价值立刻体现：你只需要改 <code data-page-node-id="P2o9rrWuuZfQE3C0wCgBYD">crud/news.py</code> 里那一个 <code data-page-node-id="ZGUixPKxFMDXkief1pora7">where</code>，路由层、schema 层、模型层统统不用动，也不会牵连到收藏、历史等其它业务。反之如果 SQL 散落在路由函数里，你就得满项目翻找。</p>
+  <p data-page-node-id="9luDxFsfYhLUb2mvjxIGqO">这就是「<strong data-page-node-id="Cr0XdYqVrDF9a0ysaI2hFx">关注点分离</strong>」——把变化的原因收敛到一处。</p>
+</div>
+
+<h2 id="s3" data-page-node-id="nH39hZWUaFs3O2pLpXHOXn"><span class="num" data-page-node-id="ULDMeclV4xHKqWrfEABCL3">3</span>目录与文件总览</h2>
+
+<p data-page-node-id="sAfgNHNEw8FWc3aZMopcA6">项目一共 <strong data-page-node-id="LLkS4AQUGU3iBnMUuda8Zo">19 个 Python 源文件</strong>（不含 <code data-page-node-id="ugQKibjBL2cxHIbuETPFUO">.venv</code> 和 <code data-page-node-id="2GH4zX8pDL4iuvCWLvKDEu">__pycache__</code>），分布在 7 个包 + 1 个入口文件里。</p>
+
+<table data-page-node-id="E6qMPowcDfYTNyyutzBKIM">
+  <thead data-page-node-id="hL6CRbJdrgCUDxOcPRIOcm">
+    <tr data-page-node-id="THWcDMkuqOEogLHnG4FVJd"><th style="width:210px" data-page-node-id="58l93ttFFxBBSEndSWv29p">文件路径</th><th style="width:120px" data-page-node-id="4VfIHf93vCtHd27TO6kuhl">角色</th><th data-page-node-id="411ameNyjwrlUENi3Ib6P6">作用</th></tr>
+  </thead>
+  <tbody data-page-node-id="jLK36GVKGy19BaFZ8g4cfl">
+    <tr data-page-node-id="TQ0TJytCm9OFKLy3P7zLVn">
+      <td class="mono" data-page-node-id="bFyrtt99ZhNcTkHfgw6ztx">main.py</td><td data-page-node-id="xZJCSD2TvlblZA0Nt0oeKy">入口</td>
+      <td data-page-node-id="J5Avau1jOxHa2CagzSff5R">创建 <code data-page-node-id="M3vKPLxSlXJjQzG5dBr2Vt">FastAPI()</code> 实例 → 注册全局异常处理器 → 挂 CORS 中间件 → <code data-page-node-id="lrZvR1SjBiFrYcOSGsXIx4">include_router</code> 把 4 个路由模块拼进来。整个程序从这里启动。</td>
+    </tr>
+    <tr data-page-node-id="iJbYtFL6RFl98ANbCgdg4a">
+      <td class="mono" data-page-node-id="EcopZ1m204bVUidFKJUgYE">test_main.http</td><td data-page-node-id="M0SbvfTwdFNWZqycU4V2jB">测试脚本</td>
+      <td data-page-node-id="3H95GGJ87KbnKd5dXl1DqU">JetBrains IDE 的 HTTP 请求文件，点一下就能发请求测接口，不用开 Postman。</td>
+    </tr>
+
+    <tr data-page-node-id="ZW90o4CP81tpbQ9OZAp4QH">
+      <td class="mono" data-page-node-id="ThMMz0QnNqrBjSkG0Gp12K">config/db_conf.py</td><td data-page-node-id="WIbvGtN66tj0uRWwrc2Uzj">基础设施</td>
+      <td data-page-node-id="eu7GHqbUFMzUDUlWZwqo7K">组装数据库三件套：<code data-page-node-id="eQJzy3f2kSyFlKWa0uhHZD">async_engine</code>（连接池引擎）、<code data-page-node-id="X7kqrFxexwLf7VNnq5hWG4">AsyncSessionLocal</code>（会话工厂）、<code data-page-node-id="m9Yt4rCngHiGOqLVRuu3BH">get_db()</code>（FastAPI 依赖，管事务与连接回收）。</td>
+    </tr>
+    <tr data-page-node-id="b44G3LqzcBI8Owd4RYfL0t">
+      <td class="mono" data-page-node-id="HHKAfW8s7kqY3rryQ9ctLs">config/cache_conf.py</td><td data-page-node-id="OKOE6LrHBYHKwOtDrf8Y4p">基础设施</td>
+      <td data-page-node-id="fHRRZ1Ld5XYTW3VwBiTKru">创建全局 Redis 异步客户端，并提供三个最底层函数：<code data-page-node-id="UfSwOTPrMGTUAoLZY9CAll">get_cache</code> / <code data-page-node-id="O35q2wTUsuGrpFBJNNMJHg">get_json_cache</code> / <code data-page-node-id="XDPbX7Z5mQaOXfEg4rk126">set_cache</code>。所有缓存读写最终都走这里。</td>
+    </tr>
+
+    <tr data-page-node-id="pVZeDCjza4ANFR1sBO73im">
+      <td class="mono" data-page-node-id="P8L5YvzNQSPkXt5UcJ47AH">models/news.py</td><td data-page-node-id="XrfMm0Fk3XUVFzhGaRJXoz">ORM</td>
+      <td data-page-node-id="j1cqNSOeREZEABON9lBu3d">两个类：<code data-page-node-id="DHxwXd2oVZZQnp45rxlvu9">Category</code>（新闻分类表）和 <code data-page-node-id="KXMo1Ly2pvyuqfpYbkAI8c">News</code>（新闻表）。本文件的 <code data-page-node-id="P9q1ytcbtCebGh29TAn5sC">Base</code> 还携带了公共字段 <code data-page-node-id="t71ToRMSXowA8FYxPjxNnN">created_at</code> / <code data-page-node-id="FGmB9qttbjkT9TAbtbdVtA">updated_at</code>。</td>
+    </tr>
+    <tr data-page-node-id="0FObkZBy5pIoSFaTlm5OXC">
+      <td class="mono" data-page-node-id="zrfIfamrRzgFMPBZu0idY9">models/users.py</td><td data-page-node-id="l6FiwHZfWL0HuSXkaRJsyO">ORM</td>
+      <td data-page-node-id="ftkr720cMLvvgklIzCw1LM">两个类：<code data-page-node-id="KgCqrZQM4XFPBstB4e30y4">User</code>（用户表，含昵称/头像/性别/简介/手机号）和 <code data-page-node-id="wEPCgDK3TXRcWYRpNQY6UF">UserToken</code>（令牌表，一人一条，7 天过期）。</td>
+    </tr>
+    <tr data-page-node-id="cZycylLtNpkPfanvLWrQld">
+      <td class="mono" data-page-node-id="GtF5qLDlOsEemiYzil6I4j">models/favorite.py</td><td data-page-node-id="TqvFeIf47Dc726NBVifvjA">ORM</td>
+      <td data-page-node-id="OBNelLxK5fO0kcikuH2SV6"><code data-page-node-id="vZN61awJmmyXe8pTB7qsL0">Favorite</code>（收藏表）。靠 <code data-page-node-id="2u6EV37xWZCpG8JNhGdsMi">(user_id, news_id)</code> 的联合唯一约束保证同一新闻不会被同一用户重复收藏。</td>
+    </tr>
+    <tr data-page-node-id="YcBqOwmvEJFoMEdmATfiLz">
+      <td class="mono" data-page-node-id="zDYAO4454dwjxN2Q7xlUCW">models/history.py</td><td data-page-node-id="RCHTDIBCg81hmU8vRHFeyQ">ORM</td>
+      <td data-page-node-id="zRTHIu7wONTBBQ4oFJfs6Y"><code data-page-node-id="6V4IYafTa4jaZYvANsaGb0">History</code>（浏览历史表）。记录谁在什么时候看了哪条新闻。</td>
+    </tr>
+
+    <tr data-page-node-id="fhqLFt7EIkhUML3aWhCjid">
+      <td class="mono" data-page-node-id="FQfS6pXgCZA9KhU76Wd87R">schemas/base.py</td><td data-page-node-id="q2811wfzWqXruYEdmAUwEZ">契约</td>
+      <td data-page-node-id="eeEfwLAT2aPi8U4o17jH4F"><code data-page-node-id="mFdATSMYuhOSvYQ7gcG8GU">NewsItemBase</code>：新闻的公共字段模型（id/标题/简介/封面/作者/分类/浏览量/发布时间），并把 <code data-page-node-id="zCL9KOtB3SiGC80LRyu8La">category_id</code>、<code data-page-node-id="fr4n8IXVumIyd7UQHiaYHL">publish_time</code> 通过 <code data-page-node-id="61iRWtKDDRmWlzGNZNUwA5">alias</code> 输出成 camelCase。<strong data-page-node-id="F1eTERJnHwhnIBbOQCc5ym">收藏列表和历史列表都继承它</strong>，避免重复定义。</td>
+    </tr>
+    <tr data-page-node-id="K5kXXZxDJIq878pP54gpcm">
+      <td class="mono" data-page-node-id="Bxty4XR0Vnre0mZMGMBI1H">schemas/users.py</td><td data-page-node-id="SZgwpEusXTbpne3CqrGjFq">契约</td>
+      <td data-page-node-id="6mkTSpWo8ScSFYopHffiy9">6 个模型：<code data-page-node-id="rnExHvox1avf7f52FKHgST">UserRequest</code>(注册/登录入参)、<code data-page-node-id="gmWgChyBNgnLRIYkUc7OT1">UserinfoResponse</code>(可空资料字段)、<code data-page-node-id="6abSDAGFcF6C3nULjU2QGF">UserInfoResponse</code>(完整用户信息，<strong data-page-node-id="l1t3j1PcT4NJJuzyCtCnCu">不含 password</strong>)、<code data-page-node-id="dAo9X52tssa7H95bi4JvGh">UserAuthResponse</code>(token + userInfo)、<code data-page-node-id="PSH9wbxxH2ZK5lO4DLtQkw">UserUpdateRequest</code>(全可选改资料)、<code data-page-node-id="eHs5xAENxNJDA0X2AuaB4I">UserChangePasswordRequest</code>(新旧密码)。</td>
+    </tr>
+    <tr data-page-node-id="dZCLkBPhSMXCTie2cUlfZk">
+      <td class="mono" data-page-node-id="TTnrCiDOBK5wv2Pgcb1b3q">schemas/news.py</td><td data-page-node-id="PunOCdsRqWrYsYBEXAatoI">契约</td>
+      <td data-page-node-id="SUVJlP2B11r6acrxr89UXl"><code data-page-node-id="Q6C1LJhl9gZnxd7viBqJ6m">RelatedNewsResponse</code>（相关推荐的精简字段：id/标题/图/浏览量）与 <code data-page-node-id="OCWo9IydW10NrjVdkxbE4j">NewsDetailResponse</code>（继承 NewsItemBase，加 content 和 relatedNews）。</td>
+    </tr>
+    <tr data-page-node-id="Dei85cSOsxDjCcATzrxXbN">
+      <td class="mono" data-page-node-id="RuT5f4qQ2e6ORnpfFPitrs">schemas/favorite.py</td><td data-page-node-id="Kb7xtZqWDFM6s1Uf0rUOw1">契约</td>
+      <td data-page-node-id="BGcmBna1jFjQCP0xNMGfO6"><code data-page-node-id="Hl0uH8AMSujlFXXQBFoJv0">FavoriteRequest</code>(入参 newsId)、<code data-page-node-id="GiTx9Wb3YBKn42FyPkehFG">FavoriteCheckResponse</code>(isFavorite)、<code data-page-node-id="ECtQaYFi1giZi4DHMleDxF">FavoriteNewsResponse</code>(新闻字段+收藏字段)、<code data-page-node-id="ulHm5lKCtzy0gSkbJwlY24">FavoriteListResponse</code>(列表+total+hasmore)。</td>
+    </tr>
+    <tr data-page-node-id="uxsCur6EdG6ds7gHrHY6UL">
+      <td class="mono" data-page-node-id="j2dQ7DkL0YaNXDXn6FJMxh">schemas/history.py</td><td data-page-node-id="iLP9rkT8advrt70pn2jlR8">契约</td>
+      <td data-page-node-id="zj8FqcQtkgHv4JeCuhgda0"><code data-page-node-id="KEBNGsFVpiWJcw0cfG3cBY">HistoryAddRequest</code>、<code data-page-node-id="R6i03mUtyp2XvVUFmfxDks">HistoryNewsItemResponse</code>(新闻字段+浏览时间+历史id)、<code data-page-node-id="AKz8uOs1S9Oy7Ctqc6WPYH">HistoryListResponse</code>。结构与收藏那套高度对称。</td>
+    </tr>
+
+    <tr data-page-node-id="rTXw8SDfEXVk1Mpc9EpItE">
+      <td class="mono" data-page-node-id="C6h8n2pAPkqRfJTxSA9ihI">crud/users.py</td><td data-page-node-id="8Vc9pFc2UXNSAIVOFqwr3x">数据访问</td>
+      <td data-page-node-id="VCss3LwtSIzpMsgYcLIMGk">7 个函数：按名查用户、建用户（含 bcrypt 加密）、签发/刷新 token、登录校验、按 token 查用户、更新资料、改密码。</td>
+    </tr>
+    <tr data-page-node-id="5FwVHSl8RMo8XfgD8GeY5L">
+      <td class="mono" data-page-node-id="VBNqcUCNDVU33z3u3jPQDt">crud/news.py</td><td data-page-node-id="pZtQJIxS0Hmwh73feky6om">数据访问</td>
+      <td data-page-node-id="NecmtmlZPI4jgViiBtqyfT">新闻相关查询的<strong data-page-node-id="BrPUazm3Ae2gC5aiRH6db6">无缓存版本</strong>：分类、列表、计数、详情、浏览量 +1、同类推荐。</td>
+    </tr>
+    <tr data-page-node-id="L1jdBgA8hPlpy07Hovm1dd">
+      <td class="mono" data-page-node-id="eCOk7JPMZgb30z0AV77rcZ">crud/news_cache.py</td><td data-page-node-id="tHZVmOsFHbjcdPjGy7sTia">数据访问</td>
+      <td data-page-node-id="8Its8MjZ5BFrzP9cS3E2c6">同样是新闻查询，但<strong data-page-node-id="851MdqInycKbTD95EBkIwv">每个函数都加了 Redis 缓存</strong>（先读缓存 → 未命中查库 → 回写缓存）。目前路由实际调用的是这一版。</td>
+    </tr>
+    <tr data-page-node-id="CcpOO8YigzF31zDP3DDD2V">
+      <td class="mono" data-page-node-id="wsDqTo2bTI0zQGOkdJUkgg">crud/favorite.py</td><td data-page-node-id="TV7AeEZGh78lpI9a1x9vzC">数据访问</td>
+      <td data-page-node-id="AEfSL9bTYvDgSinTqG03YH">收藏四件事：判断是否已收藏、加收藏、取消收藏、分页取收藏列表（<code data-page-node-id="mPEVXCqH9cfWdrZf9jwv4v">News</code> 与 <code data-page-node-id="gUrsIu5Z3lQAi1LnvVZFu6">Favorite</code> join 查询）、清空。</td>
+    </tr>
+    <tr data-page-node-id="Xq4PoYeYJRDwvoOilo3a1j">
+      <td class="mono" data-page-node-id="t7SlCPgtg8oQXdotJIUdrr">crud/history.py</td><td data-page-node-id="cI9WY0MwBQKEBZdt0baQsE">数据访问</td>
+      <td data-page-node-id="QECSA03XBOPrl3cZUekq9e">历史四件事：记录一次浏览（已有则刷新时间）、分页取列表、删除单条、清空。</td>
+    </tr>
+
+    <tr data-page-node-id="l9sgzH4COhXZSFidoger9O">
+      <td class="mono" data-page-node-id="DHfXp0cUDnf78v8wE8awkV">cache/news_cache.py</td><td data-page-node-id="thzm62rlEQuzk7KO9muhTv">缓存</td>
+      <td data-page-node-id="Iz6qTF0DlUuwFHCeBqLZ90">缓存策略层。负责拼 key（如 <code data-page-node-id="HhvV5mSnzjzYGTmmwUGVnY">news_list:1:1:10</code>）、设定过期时间（分类 2 小时 / 列表 30 分钟 / 详情 5 分钟 / 推荐 10 分钟），再转调 <code data-page-node-id="os1xj6MdQNMSXqW9zpWJKH">config.cache_conf</code>。</td>
+    </tr>
+
+    <tr data-page-node-id="DAUqxrzHngW8wDrypAThmN">
+      <td class="mono" data-page-node-id="dTGaCC0DLF9mAWhAcFCELG">routers/users.py</td><td data-page-node-id="mSBp5XBeA8deeSJKRKHlio">路由</td>
+      <td data-page-node-id="EPspVmDCs18WkJnx8zyM8G">5 个接口，前缀 <code data-page-node-id="13kVYqeoQpaF73GtlCXFls">/api/users</code>：注册、登录、取当前用户信息、改资料、改密码。</td>
+    </tr>
+    <tr data-page-node-id="QXVupoDsV6Mtfk4kmmwFrz">
+      <td class="mono" data-page-node-id="hFaqQbmDuqvHKUTKwrUb91">routers/news.py</td><td data-page-node-id="36unGlx72R2fTDn22xMXNG">路由</td>
+      <td data-page-node-id="gmOmO6MnoVBpyjWw5nF5HH">3 个接口，前缀 <code data-page-node-id="51Jgdx0HQeYKqub6GNfkAs">/api/news</code>：分类列表、新闻列表（分页）、新闻详情（含浏览量+1 和相关推荐）。含一个私有工具 <code data-page-node-id="3hObzVq15ZUrysZISj3xWn">_news_to_dict()</code> 做 ORM → camelCase 字典转换。</td>
+    </tr>
+    <tr data-page-node-id="7ed6xmNYYuFLO5U8zO88XR">
+      <td class="mono" data-page-node-id="322mZPAmpfqZvjsOAatACU">routers/favorite.py</td><td data-page-node-id="qrA7jj4Jh1sAJsf549iCXI">路由</td>
+      <td data-page-node-id="QbmBKvjKljNChqNkju5EG6">5 个接口，前缀 <code data-page-node-id="GrSo49EOi7yVJgvL1lPZxb">/api/favorite</code>：检查收藏状态、加收藏、取消收藏、收藏列表、清空收藏。</td>
+    </tr>
+    <tr data-page-node-id="G5jl933V6DSMqUylpDBr44">
+      <td class="mono" data-page-node-id="gB9OuhXBGAF0x4F2i7tjZH">routers/history.py</td><td data-page-node-id="CGegyBxAC3z2IhmSNHO88F">路由</td>
+      <td data-page-node-id="dABsuoCKCpWx27wYafAHOV">4 个接口，前缀 <code data-page-node-id="Tq6GUrcaQBtrgwRXIjoYAl">/api/history</code>：记一次浏览、历史列表、删单条、清空。</td>
+    </tr>
+
+    <tr data-page-node-id="hbQ6Qm8pDRroLtOq0SzVV2">
+      <td class="mono" data-page-node-id="2L3Jny3vtxkoau1tWEP7AT">utils/security.py</td><td data-page-node-id="zWlKKpq77IeoKvHIGm1FTm">工具</td>
+      <td data-page-node-id="s25cypXOhZYJJtwBjeBBNQ">bcrypt 密码加密 <code data-page-node-id="sWhCxfFDvzN4M0tzNXZEVi">get_hash_password()</code> 与校验 <code data-page-node-id="11Y8UzIXrzxTPwGFKiZabh">verify_password()</code>。仅被 crud/users.py 调用。</td>
+    </tr>
+    <tr data-page-node-id="5cdipwgyKSAjFprnotMYXJ">
+      <td class="mono" data-page-node-id="koSMwTMNiB0eYNn9pedV2o">utils/auth.py</td><td data-page-node-id="Skcz4XnI77dygT38KYs60j">工具</td>
+      <td data-page-node-id="EM1258vkQWwMECYGTXzvQn">核心认证依赖 <code data-page-node-id="HHYtaZS7Gr1ldtR9QjEcBI">get_current_user()</code>：从请求头拿 <code data-page-node-id="NQRXeiakdX4b51OhXzVmGY">Authorization</code> → 去掉 <code data-page-node-id="u5CDYeVmhY9dDZoukqPXn9">Bearer </code> → 按 token 查用户 → 有效则注入，无效抛 401。所有需要登录的接口都靠这一行 <code data-page-node-id="yGICRsjOB4KMrArruTX1VM">Depends</code>。</td>
+    </tr>
+    <tr data-page-node-id="ztGu0W4evWAzYEYtGYnerN">
+      <td class="mono" data-page-node-id="iABpaHFyjVD4GhwLGukfhG">utils/response.py</td><td data-page-node-id="0mikF0E1XQMzApcrOtvFQ8">工具</td>
+      <td data-page-node-id="Bo3np2ZcUVZp146YttXq2r"><code data-page-node-id="gYdG0nPsa9FIptj1lSmwV7">success_response(message, data)</code>：把业务数据包成 <code data-page-node-id="RK55dyReWvlt9EtBVbAQ09">{code:200, message, data}</code> 的 <code data-page-node-id="QuVrC6dyvKF9VHFR37Qu9q">JSONResponse</code>，并用 <code data-page-node-id="DvEhI4ldgLnRVlx8PxHqZo">jsonable_encoder</code> 处理 ORM/Pydantic 对象。</td>
+    </tr>
+    <tr data-page-node-id="BeNyY3Dux3ChHjn0Autb5p">
+      <td class="mono" data-page-node-id="7ssXqgJgPs3dhQ9ElaVjtW">utils/exception.py</td><td data-page-node-id="fT082u0j9I1mPojtd9eLmX">工具</td>
+      <td data-page-node-id="kou4VXxVyifX0THyV0iMFl">4 个异常处理函数：HTTPException（业务异常）、IntegrityError（唯一键/外键冲突）、SQLAlchemyError（数据库错误）、Exception（兜底）。全部输出统一的 <code data-page-node-id="xfjI6WgCWiHZyfOHDKOnWX">{code, message, data}</code>。</td>
+    </tr>
+    <tr data-page-node-id="HUHtBGxqUvbulGwqUUyH7Z">
+      <td class="mono" data-page-node-id="xwB38PvMel47t50dMEPH6C">utils/exception_handlers.py</td><td data-page-node-id="0d22IioPyHLPg82hwEaPLC">工具</td>
+      <td data-page-node-id="lCynVJlDTIgu5AhmOVIhwf"><code data-page-node-id="nWBBFBXSHjWu2VJ8JExTx5">register_exception_handlers(app)</code>：把上面 4 个 handler 注册到 app 上。被 main.py 调用。注意注册顺序是<strong data-page-node-id="YbE7MrXvAwbsCsDzGlLxhl">具体在前、抽象在后</strong>。</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2 id="s4" data-page-node-id="XTjgGzMkdGKO5fkUMiOkBe"><span class="num" data-page-node-id="DBAY8rdBKIe19FHa8lvJL4">4</span>接口清单</h2>
+
+<p data-page-node-id="RkcjFIO2aQ7vD47gKigv1Y">全部 17 个接口。带 🔒 的表示需要请求头 <code data-page-node-id="8BgkVRLF76QI0g0sji9gwo">Authorization: Bearer &lt;token&gt;</code>（内部用了 <code data-page-node-id="JB4L78TkNwwlKCv26UCpBR">Depends(get_current_user)</code>）。</p>
+
+<h3 data-page-node-id="mnHy3uTuXtDEHaN6jhgJnn">/api/users · 用户</h3>
+<table data-page-node-id="pE7uE7nUEd8uFOg0gfSDpd">
+  <thead data-page-node-id="R2j17uQhzD7uL9sQZHOHGr"><tr data-page-node-id="3ypTIlOaWcBNNqLbgFC74w"><th style="width:70px" data-page-node-id="dojJItUsvCOqpuXlTistLG">方法</th><th style="width:170px" data-page-node-id="Cr3Whzqy8uF4F4fygpcV1Y">路径</th><th style="width:190px" data-page-node-id="d2ZyhcVLEAc8yxUbtnG3Wi">入参</th><th data-page-node-id="mDF2tP5MjqflJpNh7YmxGL">说明</th></tr></thead>
+  <tbody data-page-node-id="teL3F7s5BhpxmMKCBFMeNS">
+    <tr data-page-node-id="qCHX74jZOYKlsNCgbE0SSZ"><td class="mono" data-page-node-id="W3KuWSrGd42YAk1YCQSBhQ">POST</td><td class="mono" data-page-node-id="K8evbNIHlXe2z7QOvaGkvX">/register</td><td class="mono" data-page-node-id="EAFeGVePaSOfW9DAUTy4RR">body: {username, password}</td><td data-page-node-id="Vz2GRAQmSjGKzLHgWDQEd3">查重 → 建用户 → 发 token → 返回 <code data-page-node-id="845hZtF6NUCc6fV59Agjbe">{token, userInfo}</code></td></tr>
+    <tr data-page-node-id="0nA174zPXrCFIKOUsRJ02H"><td class="mono" data-page-node-id="EoCYqhdUVExQ8zxyQz87zO">POST</td><td class="mono" data-page-node-id="c6BcdyBI9k2uzkeEtGiHGk">/login</td><td class="mono" data-page-node-id="vh6RfEfFhTCVZBUjHbA4X3">body: {username, password}</td><td data-page-node-id="RUDQDB1pnFF00HOA0iyltZ">校验账号密码 → 刷新 token → 返回 <code data-page-node-id="UTCyVcz792mAZ7RZhNr2Ai">{token, userInfo}</code></td></tr>
+    <tr data-page-node-id="FMmTrvHdZa5mVczDukdmJo"><td class="mono" data-page-node-id="pIkwt8zY17FsjqYWFqPYtM">GET</td><td class="mono" data-page-node-id="OZZC6wMeAaQXavVgOiAaoy">/info</td><td data-page-node-id="NkBzaCY2DDGDm7Q0PNy7Sq">—</td><td data-page-node-id="FcwVl8mnfPeHW1arCJZzwU">🔒 返回当前登录用户资料</td></tr>
+    <tr data-page-node-id="XNYhPpgiFlefGvYw1v5A3C"><td class="mono" data-page-node-id="LGPTjsQah68wOt5M6dklK9">PUT</td><td class="mono" data-page-node-id="rAeqMuBpybgunTIc4FFuQA">/update</td><td class="mono" data-page-node-id="qGFre6L87AOd57eacqknbZ">body: {nickname?, avatar?, gender?, bio?, phone?}</td><td data-page-node-id="ZTrQnnXA9s2N7sxaDqluCN">🔒 只更新前端实际提交的字段</td></tr>
+    <tr data-page-node-id="sQ2aGBLU7yvFd24yqKQ1gj"><td class="mono" data-page-node-id="VizV4PJVNJJ6ACVhF2dugd">PUT</td><td class="mono" data-page-node-id="ztWt7IaE24oPvpjNdXB8Gc">/password</td><td class="mono" data-page-node-id="TIvTVtPBxIsuEAs53tDFFf">body: {oldPassword, newPassword}</td><td data-page-node-id="sYYVKvFz2EokRuoRmM1C2O">🔒 校验旧密码 → 新密码加密入库</td></tr>
+  </tbody>
+</table>
+
+<h3 data-page-node-id="Ooa8PVETVlhnd14OOhr4qq">/api/news · 新闻</h3>
+<table data-page-node-id="jf5j8D9z1Dh7wD7ID6IsPN">
+  <thead data-page-node-id="rlIVL0xWSnHPWBoEXISoFJ"><tr data-page-node-id="IIv0CANscYoXNzQNzWkgC8"><th style="width:70px" data-page-node-id="kgh0hvOrfz9xCj1GZ1b60j">方法</th><th style="width:170px" data-page-node-id="T87JLb89mgmNr5dMTycPlC">路径</th><th style="width:190px" data-page-node-id="AGShfJczKM79bo6jK3NNlO">入参</th><th data-page-node-id="BFOqHARE5kWf1OioKoEGlf">说明</th></tr></thead>
+  <tbody data-page-node-id="K3M5deAlA6dB0ihAUY9W52">
+    <tr data-page-node-id="QyTqIl4aw0p82LHFL15WEy"><td class="mono" data-page-node-id="eQxjMZb9f0ov4PJLRUWA3d">GET</td><td class="mono" data-page-node-id="B5q0t1jf6dvZgVgoZDiD5L">/categories</td><td class="mono" data-page-node-id="DZxPgDwje5RR4oGybzki8c">?skip=0&amp;limit=100</td><td data-page-node-id="0cHTbxPVT7PiyTsr6avw3F">新闻分类列表（缓存 2 小时）</td></tr>
+    <tr data-page-node-id="tC5EsxIt6jvIriDyjrwgtO"><td class="mono" data-page-node-id="LAvmiYAV9avfYKXsCjPFsE">GET</td><td class="mono" data-page-node-id="TXVSx59WMaLTheIHBzMWpA">/list</td><td class="mono" data-page-node-id="iSbXfCeLiyzCNHgajnHqP0">?categoryId=1&amp;page=1&amp;pageSize=10</td><td data-page-node-id="5SRrjig2KoNi8VUShmMkCM">按分类分页取新闻；<code data-page-node-id="loXHyMMEriP1fVlwqV27O4">categoryId=0</code> 表示不筛选。返回 <code data-page-node-id="7OaQjp9GYp66n9fxrWmokQ">{list, total, hasmore}</code></td></tr>
+    <tr data-page-node-id="gRQP4zTzzN6uRNxaF5xk2B"><td class="mono" data-page-node-id="pHmqNqEwHjAnjqsIRPf2RB">GET</td><td class="mono" data-page-node-id="xrDGG41abG3LlxLUnMEruk">/detail</td><td class="mono" data-page-node-id="zp0XqzmKrIxRYeYP6bC0DW">?id=1</td><td data-page-node-id="aoW2cBX7L0Pw8zhE5GS4qN">新闻详情：浏览量 +1 + 同类推荐（相关推荐 4 条，按浏览量倒序）</td></tr>
+  </tbody>
+</table>
+
+<h3 data-page-node-id="7HlG1MNHevN5lKFqDlO5aF">/api/favorite · 收藏</h3>
+<table data-page-node-id="j3rSnrEAGnQjHuQBcJpLsL">
+  <thead data-page-node-id="O3uKagIVtEPAT4UN89qqDw"><tr data-page-node-id="KHBkQYy8vuQPwgjol1DDab"><th style="width:70px" data-page-node-id="XnH26mEbN2EAupwf7A0uVO">方法</th><th style="width:170px" data-page-node-id="AWHeWTVcjVyW9h28lBdNwU">路径</th><th style="width:190px" data-page-node-id="C0lCQgCaf47HcixlACRc7O">入参</th><th data-page-node-id="atAvyEYY7HHSJut6XIvuiO">说明</th></tr></thead>
+  <tbody data-page-node-id="2d3gV2UWmoyTFCoyuzcsy4">
+    <tr data-page-node-id="g2nbt3W2CMhoMyGVd3csH7"><td class="mono" data-page-node-id="cKi81swhdzaeDvy5BIteEa">GET</td><td class="mono" data-page-node-id="u2tBrKfZBK2v0aDhcN7CLn">/check</td><td class="mono" data-page-node-id="5FlR0K02ZUNB5x75sKHw5y">?newsId=1</td><td data-page-node-id="qzQDaUUqO4ca3zjUZiGFaH">🔒 该新闻是否已被收藏</td></tr>
+    <tr data-page-node-id="RiD1EQJcLlAIAAwo9DwAQo"><td class="mono" data-page-node-id="VXS2jhiLem2i3yFgCneMB8">POST</td><td class="mono" data-page-node-id="oDjmKPqyo2bF59KvD3dtma">/add</td><td class="mono" data-page-node-id="tVBIhL4W9wl7FqKjickcDT">body: {newsId}</td><td data-page-node-id="M77OBwHwluv2cZKg9307yx">🔒 加收藏</td></tr>
+    <tr data-page-node-id="4NxgQDeeHZgbVtQYC2L5EH"><td class="mono" data-page-node-id="MCnNHtwQ88HI34L7hA41uP">DELETE</td><td class="mono" data-page-node-id="9TqSiIAxDMqBa8LSVMyxKa">/remove</td><td class="mono" data-page-node-id="WJthINEFOX7Gmi2UXFYtDz">?newsId=1</td><td data-page-node-id="uGCipK2ADvvoofX0Hl2LYo">🔒 取消收藏</td></tr>
+    <tr data-page-node-id="4ptXehswdFBMxvZvsuL6ok"><td class="mono" data-page-node-id="c4eAcvIJd9InStTuwGIxaX">GET</td><td class="mono" data-page-node-id="GwNQncxkIyQBwcQUdj7vSx">/list</td><td class="mono" data-page-node-id="ExPGzT0EZzIlp5k3JVY27n">?page=1&amp;pageSize=10</td><td data-page-node-id="TSxC4lQoTuXWkE3Sq3zwpE">🔒 收藏列表（按收藏时间倒序）</td></tr>
+    <tr data-page-node-id="UxEDdA4AxtHGnuZGyCDQDq"><td class="mono" data-page-node-id="5CgxPPoppKl7WH5Wx5nkJC">DELETE</td><td class="mono" data-page-node-id="rADbNhaUcYUBpz1Bl4dZu8">/clear</td><td data-page-node-id="tpYdhwIO4BR6xKHcPwev0j">—</td><td data-page-node-id="0iTrGMwMzFa1A6VgZ8IV3O">🔒 清空当前用户全部收藏</td></tr>
+  </tbody>
+</table>
+
+<h3 data-page-node-id="CANpQDoldQldGrHeAtQ0Ti">/api/history · 浏览历史</h3>
+<table data-page-node-id="FlYNmSUnXgTjqargI7wEn7">
+  <thead data-page-node-id="zYk58yDtGJG5XScfjhxYMJ"><tr data-page-node-id="yU94OzkXWCpAnMQKzsNcgJ"><th style="width:70px" data-page-node-id="EE8w0HOjJVpwrFuAG7H1Bm">方法</th><th style="width:170px" data-page-node-id="IZC1KtsvBB30SXxI5lFAJJ">路径</th><th style="width:190px" data-page-node-id="BJ4MqXMz7vuCAiWvGV1Zkn">入参</th><th data-page-node-id="RpzNQ1NLWBXc7QXgtx96Nb">说明</th></tr></thead>
+  <tbody data-page-node-id="eKFuo6sfe2oewFeGhHQGJQ">
+    <tr data-page-node-id="vfPIHUG2nNUxuigjsE1saZ"><td class="mono" data-page-node-id="ZEIYulhLDP4tNuSj257x5l">POST</td><td class="mono" data-page-node-id="o1NUVKqxmNxySfMyHAMigF">/add</td><td class="mono" data-page-node-id="GbRkfYOpFnQq4RM0jUAKjx">body: {newsId}</td><td data-page-node-id="KGx4Ik0DPTCpm8stCjBtdC">🔒 记一次浏览（已存在则刷新浏览时间）</td></tr>
+    <tr data-page-node-id="Vf9gK2KIGkrJ99n9KW6AOW"><td class="mono" data-page-node-id="pnlA9qwvhHEaeRczTbIzB7">GET</td><td class="mono" data-page-node-id="2w4bcQwSaxBLOPd64tftja">/list</td><td class="mono" data-page-node-id="6gtqnN83UznKDKFVmvBxKX">?page=1&amp;pageSize=10</td><td data-page-node-id="0IjnAYIzulxxCNHyzr5a5R">🔒 历史列表（按浏览时间倒序）</td></tr>
+    <tr data-page-node-id="0C7hYDUbp6mfV8qSqWuxBR"><td class="mono" data-page-node-id="JwGg8j79OfAr3pIUFGcobM">DELETE</td><td class="mono" data-page-node-id="YyLIeZaYzdXwEqVwBa8u97">/delete/{history_id}</td><td class="mono" data-page-node-id="KuELzw1hCHfbJh9SnIL0wA">路径参数</td><td data-page-node-id="r4lIaZbgVugPxXo0DG4lBe">🔒 删除一条历史 ⚠️ 存在参数语义 bug，详见第 9 节</td></tr>
+    <tr data-page-node-id="BHGBHjePCAFwiMe14FDIQU"><td class="mono" data-page-node-id="i2uHIZIBqXAvndi1atEMp6">DELETE</td><td class="mono" data-page-node-id="3tALIWGF4CKdngZVJihQux">/clear</td><td data-page-node-id="oTKNzFGFwdDk8jWvYYAiHh">—</td><td data-page-node-id="B8HuzN0NMzYiTAMQvtILsP">🔒 清空全部历史</td></tr>
+  </tbody>
+</table>
+
+<div class="note" data-page-node-id="Vaj1OC1hMMAlsw7OwDF5hs">
+  <span class="lbl" data-page-node-id="108UWR3AbMkSmy1qLdSXzn">顺手一提</span>
+  <p data-page-node-id="FylTH8uBhCsETeccCBHyrq">把 <code data-page-node-id="S78QMDLERpORtsl8xHXCvQ">pageSize</code> 的 <code data-page-node-id="tatXF3a7pvl1eeUkzFMD99">le=100</code> 和 <code data-page-node-id="7oB8mAFLxbuSxAg0tMktdH">newPassword</code> 的 <code data-page-node-id="1xq7dubaKdkCwTL9gNlC2i">min_length=6</code> 这类约束写在 <code data-page-node-id="u3RegQRIHVgGTxPQBtQfeG">Query()</code> / <code data-page-node-id="rLdhQVXBXu00hq6fKPRMkA">Field()</code> 里，是 FastAPI 最省事的安全手段——校验不过自动返回 422，业务代码里一行判断都不用写。</p>
+</div>
+
+<h2 id="s5" data-page-node-id="Stw3HYwBRyk5PPivCRceUb"><span class="num" data-page-node-id="D8V8fLt2kKPRrSUAq8NMNO">5</span>一次请求的完整旅程</h2>
+
+<p data-page-node-id="cGKb1k0UXvtXNohJ4mgIbZ">看懂分层最好的方式，是跟着一个真实请求走一遍。下面挑 4 条最有代表性的链路。</p>
+
+<h3 data-page-node-id="gTkt9uDBn9S2UqJnPdM5FM">5.1 用户注册 — 最完整的一条链路</h3>
+
+<div class="flow" data-page-node-id="S9HxYxJ9HCiUhGaLHxiTOB">
+  <div class="step" data-page-node-id="4Oz76O1GQZv8mdw3nbVXbd"><div class="n" data-page-node-id="ZZ23AoLXBNoHaIA1VI6xAp">1</div><div class="body" data-page-node-id="enOp6uFExHzqepTinRgP2y">
+    <b data-page-node-id="WuMjXtSx5U3VP82OAH2h10">前端发请求</b>
+    <span class="desc" data-page-node-id="wchzbbC0gCzqPgRSg28Izy"><code data-page-node-id="zsj0PZJI4JfkEVnywHcLzV">POST /api/users/register</code>，body 是 <code data-page-node-id="9EkoBKS4LHgVRuErwOvKGO">{"username":"zhang","password":"123456"}</code>。</span>
+  </div></div>
+  <div class="step" data-page-node-id="wcfVeWNGhotndddAbFptnS"><div class="n" data-page-node-id="AaWLkpv5rVhAR4hgVqSHw1">2</div><div class="body" data-page-node-id="4T7bP07xW0uvfFVwfvSGMU">
+    <b data-page-node-id="qbsAtafTFMeEJpIUAfSX2Q">CORS 中间件放行</b>
+    <span class="desc" data-page-node-id="AjR1ekKayHhLP02tRHcTGK"><span class="file" data-page-node-id="2fx9CPwNnxmUqiREnTXTMq">main.py</span> 里挂的 <code data-page-node-id="Ht6iRezUee1LdEhAso6Lcu">CORSMiddleware</code> 先判断这个来源能不能访问后端，通过才继续往下。</span>
+  </div></div>
+  <div class="step" data-page-node-id="BiOqRpuf4ZSYNDZtnrYz4t"><div class="n" data-page-node-id="4XqglEp3nvNmh7n7wDfAdq">3</div><div class="body" data-page-node-id="qKyA0VyHNKdIBQwT2gbbID">
+    <b data-page-node-id="t2MXFUoFUNb1EPoD4HqqSC">路由匹配 + 入参校验</b>
+    <span class="desc" data-page-node-id="laK22c5DaQGNvUOBqRXAeC"><span class="file" data-page-node-id="LyBOycn1mVFJxmLwr1TJS9">routers/users.py → register()</span>。FastAPI 用 <code data-page-node-id="QM5hxv0wynAW4Z5Med8POX">UserRequest</code>（<span class="file" data-page-node-id="eZCLPWwqk0aXJdULIEJtVF">schemas/users.py</span>）把请求体解析成对象，缺字段或类型不对直接 422，函数体根本不会执行。</span>
+  </div></div>
+  <div class="step" data-page-node-id="y9rhY3sIcGwk3i7JvaVQGK"><div class="n" data-page-node-id="M1GUNrjb8sLCfYrHN1kPQ7">4</div><div class="body" data-page-node-id="PElBH9QbVAJapX2Ssc2ojJ">
+    <b data-page-node-id="FygE8G2qCIJwzL3pzBO8v0">注入数据库会话</b>
+    <span class="desc" data-page-node-id="W0ts98OJpQjRPn08Se3p5E"><code data-page-node-id="RfJ5QNUBlk4ptJj9njVJni">db: AsyncSession = Depends(get_db)</code> 触发 <span class="file" data-page-node-id="dgTUZ3WMEMNMpN6fEO1ELb">config/db_conf.py</span> 的 <code data-page-node-id="EHNsrfaejydVB8Ja1xrO4u">get_db()</code>，从连接池领一个 session 出来交给路由函数。请求结束时它会自动 commit / rollback / close。</span>
+  </div></div>
+  <div class="step" data-page-node-id="NFriq7tOdYsK7ppOySYGCM"><div class="n" data-page-node-id="SEHSvHV65edxZdTCv5ZLbs">5</div><div class="body" data-page-node-id="A0KJ6p9VG7TPAPq8A98EXf">
+    <b data-page-node-id="7PlenXDvL0qPv1fvHBvUzr">查重</b>
+    <span class="desc" data-page-node-id="vvPZNJ0QgA033hc2NoDSLu"><code data-page-node-id="BIADmCXeXc5jgo6jOoCjbK">users.get_user_by_username(db, ...)</code> → <span class="file" data-page-node-id="jVZa3a2afHaBQAmFURpv3s">crud/users.py</span> 拼出 <code data-page-node-id="PO8zTf8dRD4bpQjOBvSFqt">SELECT * FROM user WHERE username = ?</code> 交给 MySQL。查到就抛 400「用户已存在」。</span>
+  </div></div>
+  <div class="step" data-page-node-id="1QV6TwzkL2NaWaOXEKlD40"><div class="n" data-page-node-id="Gg8lbs39lWBMrtrgulhs3N">6</div><div class="body" data-page-node-id="GE24vCtFyAm6Fq3HhRCfCL">
+    <b data-page-node-id="tUnmTvzhPjVIwmMWGEVfzg">加密 + 建用户</b>
+    <span class="desc" data-page-node-id="uBLx1RPXbOEpug0ByV0l8l"><code data-page-node-id="HLRgJFk4LxmrmwYVyR2IpI">create_user()</code> 先调 <span class="file" data-page-node-id="HK98xKBKDHOz9donE1edXY">utils/security.py</span> 的 <code data-page-node-id="OnSMrBazN3ZJdnF8Gch0dJ">get_hash_password()</code> 把密码变成 bcrypt 哈希，再 <code data-page-node-id="5TIQ5RC2DAPHMdrU1s1zSZ">db.add()</code> + <code data-page-node-id="7mFj4yyWY3QNyxAZ9vsyWa">commit()</code> 写进 <code data-page-node-id="XiBO09PWnLgIubO0SBhMEA">user</code> 表，<code data-page-node-id="J8gs90UFBn1Zxvtg95xGwA">refresh()</code> 拿回数据库生成的自增 id。</span>
+  </div></div>
+  <div class="step" data-page-node-id="rdOHK1u3Sm7jM5nTquAFN9"><div class="n" data-page-node-id="mhdAJ1A1paCIIo6qTYEgD7">7</div><div class="body" data-page-node-id="ez12wAtqzxPbK67o1v8Gds">
+    <b data-page-node-id="AKP9z2tXoplmrDeiBF2bCI">签发 token</b>
+    <span class="desc" data-page-node-id="nPJ8bcAaroKQKBnXNS2D8B"><code data-page-node-id="RHLCcZcm0vAgo8ry4AiUgb">create_token()</code> 用 <code data-page-node-id="zIv54MRB3TCZg3J2rv9ujZ">uuid4()</code> 生成随机串，过期时间 = 现在 + 7 天，写入 <code data-page-node-id="gzFqhJ9HxMcCPLEZjg2aOH">user_token</code> 表（已有记录则刷新，保证一人一条）。</span>
+  </div></div>
+  <div class="step" data-page-node-id="35g48jaJtHVMnxKii8MeJD"><div class="n" data-page-node-id="CdoCrhYDzLM5Dbc68PnJtS">8</div><div class="body" data-page-node-id="XKh0e61IgSYZvILE1SshrH">
+    <b data-page-node-id="19f4C3x8kkeTuYaRWXeGP5">组装响应</b>
+    <span class="desc" data-page-node-id="h6oimCBnVHVNvt8LD3msva"><code data-page-node-id="BMPdFq60cv3UK56yFXgXBj">UserAuthResponse(token=..., userInfo=UserInfoResponse.model_validate(user))</code> —— 注意这里用的是 <code data-page-node-id="BcVZhvU0HJBL0CE1U2oXbm">UserInfoResponse</code> 而不是 <code data-page-node-id="5zVthqGcplRSkqYOoUj1QL">User</code>，所以 <code data-page-node-id="Dxc9EVTE6bzxyMlc3N8H8c">password</code> 字段天然不会泄露出去。</span>
+  </div></div>
+  <div class="step" data-page-node-id="zvMOFIjEAc5sCsq4IIaTmw"><div class="n" data-page-node-id="49Hip4jnKXYul3XsxJFL3U">9</div><div class="body" data-page-node-id="l2c58Pv9GumFESRiD2AUnO">
+    <b data-page-node-id="kSWc7IcOA0tFCUdaLlCroc">统一格式返回</b>
+    <span class="desc" data-page-node-id="gBVRsXnPjUQ21uemcbcd5X"><code data-page-node-id="L8NoREKlRHOzxi9zEKZJWa">success_response(message="注册成功", data=...)</code>（<span class="file" data-page-node-id="6jrlcPd8dvAalufjOBMQGA">utils/response.py</span>）包成 <code data-page-node-id="nlBxKNCr0qQT2l1lEwC6AU">{"code":200,"message":"注册成功","data":{"token":"...","userInfo":{...}}}</code>，前端只需判断 <code data-page-node-id="j7beQACzk2FofJ7TI3FaWf">code === 200</code>。</span>
+  </div></div>
+</div>
+
+<h3 data-page-node-id="z6XmmUVCtNEdWklGIx7QTp">5.2 取新闻列表 — 带缓存的读链路</h3>
+
+<p data-page-node-id="WtazJIupmlAJkYyIvr40b2">关键差异是：<strong data-page-node-id="57S77XGEBIgytRChN18G0N">先问 Redis，Redis 没有才去问 MySQL</strong>。这条链路涉及 <code data-page-node-id="xUvo1w5kt2QmTA4VyLAFET">routers → crud/news_cache → cache/news_cache → config/cache_conf → Redis</code> 共 5 个文件。</p>
+
+<pre data-page-node-id="6a5G6DiyTtUDe8a5MQVZzu"><code data-page-node-id="CTQrTHDAELRJHCAbtdNMv4"><span class="cmt" data-page-node-id="VFYGU5ImpB0BRQGtRC45dD"># routers/news.py</span>
+news_list = await news_cache.get_news_list(db, category_id, offset, page_size)
+total     = await news.get_news_count(db, category_id)
+has_more  = (offset + len(news_list)) &lt; total
+return {"code": 200, "message": "获取新闻列表成功",
+        "data": {"list": [_news_to_dict(n) for n in news_list], "total": total, "hasmore": has_more}}</code></pre>
+
+<p data-page-node-id="reUMCnoQbroF4kzrITGPNo"><span class="file" data-page-node-id="MRFWbvlIGuyoscCzxxgYcc">crud/news_cache.py</span> 里做的三件事：</p>
+<ol data-page-node-id="592wYPfeuKBQmzlQI3bcQd">
+  <li data-page-node-id="M0X3Kf4FE4ZeeMA5GAYZY9">把 <code data-page-node-id="uulxDRCv82XtWqZXTnitBe">offset</code> 换算成 <code data-page-node-id="fcwN9aHYEEWMQpFUwgu1Ul">page</code>（因为缓存 key 用页码更好读）</li>
+  <li data-page-node-id="zg9sAv910C9pgWT1doCFaZ">调 <code data-page-node-id="oLUJG3lWBnGa56SUCn5n39">get_cache_news_list()</code> 读缓存。命中就把存进去的 dict 用 <code data-page-node-id="2hQRUI1eUZVjNkUWFbltUQ">_dict_to_news()</code> 还原成 <code data-page-node-id="HJuHWK1iFmBX8jN4bpiXrn">News</code> 对象返回</li>
+  <li data-page-node-id="XQ7Rp9Lp4LHuIXvu9wFoHO">未命中 → 查库 → <code data-page-node-id="bmsjiHvcE3Q4mbd14CS1tX">jsonable_encoder()</code> 转成可 JSON 化的结构 → <code data-page-node-id="FFMC30HQAvw3E60xbUDM2s">set_cache_news_list()</code> 回写，过期 1800 秒</li>
+</ol>
+
+<div class="note warn" data-page-node-id="l2uYOvECTEG2H4NCA3eUj6">
+  <span class="lbl" data-page-node-id="VjulvfmGcsuZm0wxP287iR">这里有个容易踩的坑</span>
+  <p data-page-node-id="3jrZOsyBswwVEFs3XwdgIM">缓存里存的是 JSON，原本的 <code data-page-node-id="201xqAUK7dImpRvsPYtWFD">datetime</code> 会变成字符串。所以 <code data-page-node-id="rI9ayNnmPjsENOHZZar00C">_dict_to_news()</code> 必须做一步 <code data-page-node-id="FXNEj7cq1YM6KtTBeDB4NR">datetime.fromisoformat()</code> 反向转换。否则路由层调用 <code data-page-node-id="uLDxTYoRo2nMm799TShylB">n.publish_time.isoformat()</code> 时，字符串没有这个方法是会直接报 <code data-page-node-id="NN5FP41VD5MApFB1Ea2gXC">AttributeError</code> 的。</p>
+  <p data-page-node-id="aNTB1RzBhPbRyAAdb7rAmI"><strong data-page-node-id="2HiYCWgxh4rSnW7Cz7uAOA">结论：凡是要从缓存还原成对象，就必须处理时间字段的反序列化。</strong></p>
+</div>
+
+<h3 data-page-node-id="DOMUtMiI7MSLYCGg6QnnwY">5.3 收藏一条新闻 — 需要登录的写链路</h3>
+
+<div class="flow" data-page-node-id="J0qEU8zFiJLuInuhDielCi">
+  <div class="step" data-page-node-id="0AmkQKMLOCxX2FCwKTG9xb"><div class="n" data-page-node-id="jLOE5XwGOPkVHDRoGcS7pu">1</div><div class="body" data-page-node-id="l4t6W5kcH0UkeTvIFqftFC">
+    <b data-page-node-id="no6Qt1TBAnKJEWJiFtS9J8">前端带 token 请求</b>
+    <span class="desc" data-page-node-id="GfF6wbDjCYOBsutisHmK3T"><code data-page-node-id="SCueA0li772KY4DUgVmhdd">POST /api/favorite/add</code>，header 里带 <code data-page-node-id="KMbwuh6uU61xNt7HYwlC9g">Authorization: Bearer &lt;token&gt;</code>，body 是 <code data-page-node-id="b64DPNVGqJqLdhZAGHAhOX">{"newsId": 1}</code>。</span>
+  </div></div>
+  <div class="step" data-page-node-id="gWofPPyalUFkuf58roPNYb"><div class="n" data-page-node-id="yZwFT5sqrZdc3A5pdBqA9I">2</div><div class="body" data-page-node-id="ct6ij9Q4aEzG1QJ1nHtW2y">
+    <b data-page-node-id="5V9GoMFb1tWvt5hyzG8ZM5">认证依赖先跑</b>
+    <span class="desc" data-page-node-id="3DKK0eQZlA2nLQITywkjiO"><code data-page-node-id="v1n7EEsXjXqFliYHDr3DR7">Depends(get_current_user)</code> → <span class="file" data-page-node-id="AEsIhRqrCCskCybWeiFMHT">utils/auth.py</span>：取出 header 值 → <code data-page-node-id="y7Jty0t4lebCD30Bf7aduj">replace("Bearer ", "")</code> 得到纯 token → 调 <code data-page-node-id="1tlkEORpLqtHQ7PCtX8IA3">crud/users.py</code> 的 <code data-page-node-id="sTa1A4mPDQONwZAfffXk8O">get_user_by_token()</code> 查 <code data-page-node-id="eED5zf6J3olKSzBYp468CV">user_token</code> 表并判断是否过期 → 有效则把 <code data-page-node-id="EU769Mx15NOkyMUYuAGNbY">User</code> 对象注入到 <code data-page-node-id="VyuTbTogDb5uj6NDf93YlO">user</code> 参数。无效则 401，<strong data-page-node-id="XlykWgjHsp9QiRLA2nL7Gb">路由函数体不会执行</strong>。</span>
+  </div></div>
+  <div class="step" data-page-node-id="qxGHSGmCShqGfYNmdlOJZD"><div class="n" data-page-node-id="pC8TE5lAIzLx7AulSpXHyx">3</div><div class="body" data-page-node-id="GCicoCsVnAPUlitYbH7G50">
+    <b data-page-node-id="tzkJdxMB6iJCTEYTBcpDud">写库</b>
+    <span class="desc" data-page-node-id="C7NvPhuk0r1cY6GS2B36KG"><span class="file" data-page-node-id="aC42rZFfepvyYoMiCoOJHj">crud/favorite.py</span> 的 <code data-page-node-id="O6tyuzrKYq2x2TZ1C0R6Dk">add_news_favorite(db, user.id, body.news_id)</code> → <code data-page-node-id="si5DjAH9lHUV5epHWxkc0X">db.add(Favorite(...))</code> + <code data-page-node-id="RMnOsC0XzJx9zvVzenYrG0">commit()</code>。</span>
+  </div></div>
+  <div class="step" data-page-node-id="1Ba14iLtVJv38YBjCNBIaZ"><div class="n" data-page-node-id="CPe3VpzuIMsO81D3M12ISp">4</div><div class="body" data-page-node-id="THRb2ciwsCowVgnlZVnXQu">
+    <b data-page-node-id="cbpS1aDHTUtETtcbw3vr2I">统一返回</b>
+    <span class="desc" data-page-node-id="XSeXPVB7XXQWk5E9SsPf1u"><code data-page-node-id="6LecZf7AFCwDBNIsqGnh17">success_response(message="添加收藏成功", data=result)</code>。</span>
+  </div></div>
+</div>
+
+<div class="note" data-page-node-id="uHrvF83EOnAGCtFbTkCGPP">
+  <span class="lbl" data-page-node-id="ryyv5DwDoSIuqgA9kzsOib">安全上的一个关键点</span>
+  <p data-page-node-id="x4kQTp4EOrtcW9N22e6rSO"><code data-page-node-id="CXgvarTAZ8oMjGsILJVICE">user_id</code> 来自 token 解析结果，<strong data-page-node-id="FAvX3yVPsd4sBL2wqXVDyb">从不从前端传参里取</strong>。如果前端能自己传 <code data-page-node-id="32JNc8sa2tgBO53RExhkJl">userId</code>，那任何人都能给别人的账号加收藏。这是「越权」类漏洞最常见的成因。</p>
+</div>
+
+<h3 data-page-node-id="3rfJ2KKHqXkmG4lsI9Cpxu">5.4 取新闻详情 — 读、写、缓存混在一起</h3>
+
+<pre data-page-node-id="jgxu6Oa5kGseckkN5hmEUz"><code data-page-node-id="8s2IvJzKyfNdazU6rw18eg"><span class="cmt" data-page-node-id="cfAX2GoWOto0IBKbaAYo4w"># routers/news.py → get_news_detail()</span>
+news_item = await news_cache.get_news_detail(db, news_id)     <span class="cmt" data-page-node-id="Qbe82khCBSvImIqIH4Iw34"># ① 带缓存地查详情</span>
+if not news_item:
+    raise HTTPException(status_code=404, detail="新闻不存在")
+
+views_res = await news.increase_news_views(db, news_item.id)  <span class="cmt" data-page-node-id="yzF1pF9qCsBIMpDA6ohfQw"># ② 浏览量 +1（走无缓存版 crud）</span>
+other = await news_cache.get_related_news(db, news_item.id, news_item.category_id)  <span class="cmt" data-page-node-id="bMUWMBiCUXDlKvG9mlF0uF"># ③ 带缓存地取推荐</span>
+
+data = _news_to_dict(news_item)
+data["relatedNews"] = related
+return {"code": 200, "message": "获取新闻详情成功", "data": data}</code></pre>
+
+<p data-page-node-id="a9VQeF0Bhdk866gKFdaGv8">这条链路同时用到了 <code data-page-node-id="iXgc14rQXaxW7fU9wj3nrX">crud/news.py</code> 和 <code data-page-node-id="nJOsB485amlDnqIN4wqnUn">crud/news_cache.py</code> 两个模块——这正是第 9 节要指出的问题之一。</p>
+
+<h2 id="s6" data-page-node-id="0CTyE5NxeQRG5twoHiSl9W"><span class="num" data-page-node-id="3eYL2xpAwygFhSv9fRVVnL">6</span>逐层逐文件详解</h2>
+
+<h3 data-page-node-id="7SIKAJi8ZPAvIQvUyCRG5c">6.1 main.py — 组装车间</h3>
+
+<p data-page-node-id="wNt1cAj9dPakmm9Fow2cyl">它自己几乎不含业务逻辑，只做四件事，顺序很重要：</p>
+
+<pre data-page-node-id="vrIFPeDnjzl4Dpo43sQFyv"><code data-page-node-id="Do45YAhttidl82NthFZEJb">app = FastAPI()                                  <span class="cmt" data-page-node-id="aKtAi7Wh8iHK04hVrg8hdo"># ① 创建应用实例</span>
+register_exception_handlers(app)                 <span class="cmt" data-page-node-id="vl3QQmvMPSdaqS7zlthald"># ② 注册全局异常处理</span>
+app.add_middleware(CORSMiddleware, ...)          <span class="cmt" data-page-node-id="KjHtsFk3U00tHthcxqw2Wz"># ③ 挂跨域中间件</span>
+app.include_router(news.router)                  <span class="cmt" data-page-node-id="REbqzGxIq799geeaGhQQba"># ④ 挂载 4 个路由模块</span>
+app.include_router(users.router)
+app.include_router(favorite.router)
+app.include_router(history.router)</code></pre>
+
+<p data-page-node-id="Zzb5WVW5suxwGFZWR5qhnv">运行方式：<code data-page-node-id="ZahlkROffrBSxQyzTJHNWX">uvicorn main:app --reload</code>。其中 <code data-page-node-id="Od6m8mXwvWrhNstSn58NuK">main</code> 是文件名（<code data-page-node-id="FTxebgmyErJCmEWRYDojzw">main.py</code>），<code data-page-node-id="aAGHKunf2CMah4FsvGizhc">app</code> 是文件里的变量名，<code data-page-node-id="grYqoxuCXPqNZx3NqwliOV">--reload</code> 表示改代码自动重启（仅开发用）。</p>
+
+<p data-page-node-id="6SXy2hgLJQBkskgDTefJjD">启动后打开 <code data-page-node-id="y9F0QDrBLUpEcERnIW9fJl">http://127.0.0.1:8000/docs</code> 就能看到 FastAPI 自动生成的交互式接口文档，17 个接口全在里面，可以直接点着测。</p>
+
+<h3 data-page-node-id="5sGZn8jJxoKmr66ynvofKg">6.2 config/db_conf.py — 数据库三件套</h3>
+
+<table data-page-node-id="Jn8dmWZMCWZnq4koDqsn5t">
+  <thead data-page-node-id="PaaaOCgSPpKMZzFXBH68d8"><tr data-page-node-id="h5QdQ2KKYDRX7Op8eC6vyM"><th style="width:200px" data-page-node-id="iIkAAETMfkViRlzk0rA3jB">对象</th><th data-page-node-id="EZCOt7GeTorEm8Q7ED4G7D">是什么 / 为什么存在</th></tr></thead>
+  <tbody data-page-node-id="MCVwCJVnUFukVAgRhzDnKt">
+    <tr data-page-node-id="HlI6wmOXcRE83YDNmqsGG5"><td class="mono" data-page-node-id="B3bEiJkP5MDElzvk6ld1F1">ASYNC_DATABASE_URL</td><td data-page-node-id="7K6D6D5Zqhp7ptRPJHbSmT">连接串，形如 <code data-page-node-id="piw7Em9gCDeBmKcgDtldpa">mysql+aiomysql://用户:密码@主机:端口/库名</code>。<code data-page-node-id="0qUuiJsj4wZoQAtKDyD6CR">+aiomysql</code> 就是指定异步驱动。用 <code data-page-node-id="qj6mx1YPKRO2ixTlcZDGpA">os.getenv</code> 优先读环境变量，是为了不把密码写死在源码里。</td></tr>
+    <tr data-page-node-id="xEwh54TOVSGb7GI7pFbb8y"><td class="mono" data-page-node-id="4QGqRnkBcv0lsxwWhuBt3h">async_engine</td><td data-page-node-id="7HlZWJjNCjXqgMCbgsX64A">引擎，负责管理<strong data-page-node-id="sJORRtxG3vr5ipYHRgOeEf">连接池</strong>。<code data-page-node-id="lBB0HGMaSihDJ2oQfwLwjE">pool_size=10</code> 是常驻连接数，<code data-page-node-id="vBlptu4EgAoF9EGwfUMmBD">max_overflow=20</code> 是高峰时允许临时多开的连接数。有连接池就不用每次请求都重新握手，这是性能的关键。</td></tr>
+    <tr data-page-node-id="Xl1SqHFDlfPRWBcMxscaHP"><td class="mono" data-page-node-id="e4vQBWCpLp3Kx054FQHfV9">AsyncSessionLocal</td><td data-page-node-id="nno54VXCMWn0pmY4VVM2pe">会话工厂。<strong data-page-node-id="jTynjrEXQAWAsfdWJPh86p">引擎管连接，会话管一次工作单元</strong>。注意 <code data-page-node-id="FYrhvQiP28BGKTCOhN3CPs">expire_on_commit=False</code>——默认 True 时，commit 后对象所有属性会失效，下次访问属性会再查一次库（在异步下会直接报错），所以这里必须关掉。</td></tr>
+    <tr data-page-node-id="Fgp1lDcZhVYatqA3wKymj5"><td class="mono" data-page-node-id="Jqf1exHQcBup0Q9KalLC06">get_db()</td><td data-page-node-id="GqQ2ida0TaeEqoseUdw6N0">FastAPI 依赖。用生成器 + <code data-page-node-id="4k0SxT8GQqp5ut2TrUCEMk">yield</code> 把「创建会话」和「收尾」串在一起：正常结束 → <code data-page-node-id="vtPEUGeZy6PXVvpxMKuKxn">commit()</code>；出异常 → <code data-page-node-id="olIZ6RQ3EQtw5KDo1w2Cpn">rollback()</code> 并重新抛出；无论如何 → <code data-page-node-id="1xDXo3oq0Bn5J2ZpyknYdh">close()</code> 把连接还回池子。</td></tr>
+  </tbody>
+</table>
+
+<pre data-page-node-id="F1StA3ybKZA3rH4cUzGQ4w"><code data-page-node-id="wwnvGgPO3g5AKEVX7VF2Rg">async def get_db():
+    async with AsyncSessionLocal() as session:   <span class="cmt" data-page-node-id="VueBcFIzAE3SfAJVMZ8VGe"># 进：领一个会话</span>
+        try:
+            yield session                        <span class="cmt" data-page-node-id="6UbGqWPoTxUsqzM79s1kLA"># 把会话交给路由，暂停在这里等它跑完</span>
+            await session.commit()               <span class="cmt" data-page-node-id="j6njAuQPvs1kWISCUneXZ7"># 路由正常结束 → 提交事务</span>
+        except Exception:
+            await session.rollback()             <span class="cmt" data-page-node-id="5qAKKqZGBAUmel3gvXCHKf"># 出错 → 撤销本次所有未提交修改</span>
+            raise                                <span class="cmt" data-page-node-id="cQHEwVBvuoNiXSGUcA6x0x"># 继续抛，交给全局异常处理器</span>
+        finally:
+            await session.close()                <span class="cmt" data-page-node-id="ZQdcBc8nzVLZGJ6FOkGew6"># 无论如何 → 归还连接</span></code></pre>
+
+<div class="note tip" data-page-node-id="YfLhhB7e73DLznbFCZRirG">
+  <span class="lbl" data-page-node-id="aSvByfRsPkO0kRoXBkRAGD">为什么 yield 这么重要</span>
+  <p data-page-node-id="Sz5Jb9BXF1fPPseFKt2Qcp">它让「事务边界」和「HTTP 请求边界」自动对齐：<strong data-page-node-id="4NaXAUMOwbN59eNqSwGHvx">一个请求就是一个事务</strong>。路由函数里即使忘了写 commit，get_db 也会兜底提交；中途任何一步抛异常，前面所有写操作会被整齐地回滚掉，不会留下写一半的脏数据。</p>
+</div>
+
+<h3 data-page-node-id="oYSS0z1BKKcZ7jHG9cOJg5">6.3 config/cache_conf.py — Redis 底座</h3>
+
+<p data-page-node-id="rluNywRecbVxhEXY2GDxKF">创建了一个全局的 <code data-page-node-id="XQgSOEYCld3J6L5FJ8D9cd">redis_client</code>（整个项目共用一个，不要重复创建，否则会撑爆连接数）。对外只暴露三个函数：</p>
+
+<table data-page-node-id="D43vETnMK5xTA5QSidRuFc">
+  <thead data-page-node-id="l1s7zkiL4cTAoBGOZ8ZXAK"><tr data-page-node-id="nsAmxBPClvDn4m63tdPrD8"><th style="width:180px" data-page-node-id="eQ9Df498My15wRlV6FYprl">函数</th><th data-page-node-id="YIFDbm7kRAgCRZUmCnBOVF">作用</th></tr></thead>
+  <tbody data-page-node-id="7aUNrCcC6KErLlYVmxszCb">
+    <tr data-page-node-id="mz2ZvSuroME0raJFzGiM9P"><td class="mono" data-page-node-id="4qqpat327S21YzZYSv58yY">get_cache(key)</td><td data-page-node-id="2d7hUVLo0OZkDayMmO68dM">取原始字符串，取不到返回 <code data-page-node-id="gAe2QXarbGyTMUBzNTxeUX">None</code></td></tr>
+    <tr data-page-node-id="zkBav4fTp1HuuYFcOrHS1s"><td class="mono" data-page-node-id="Id2wjQOXjaMpvjd9ce8bqz">get_json_cache(key)</td><td data-page-node-id="ZXfyRBN063miBZfiHz7RuS">取出来顺便 <code data-page-node-id="6YPYIMpBxlyUQT9fIEluqx">json.loads()</code> 还原成 dict/list</td></tr>
+    <tr data-page-node-id="vmlnV7wsDff80EWH6iXvCF"><td class="mono" data-page-node-id="racR8q1GAYbv3QxPwrO8r5">set_cache(key, value, expire)</td><td data-page-node-id="is8sjF7qr36eJQi2wKnWgD">写缓存。value 是 dict/list 时自动 <code data-page-node-id="m0PnHKlAyPXWLDrbXTr4AJ">json.dumps</code>；用 <code data-page-node-id="BQzSDcfjjLwt8BAynxdtsl">setex</code> 一次完成「写入 + 设置过期时间」</td></tr>
+  </tbody>
+</table>
+
+<p data-page-node-id="Hpx5Q23uLmo5TA7R9bB8pC">三个函数都用 <code data-page-node-id="h9qLW0GOvrRhFfFp54JmWl">try / except</code> 把异常吞掉只打印日志——这是<strong data-page-node-id="LUBuuRBEezM60aQmClG2lx">有意为之</strong>：缓存只是加速手段，Redis 挂了业务应该降级去查数据库，而不是让整个接口 500。<code data-page-node-id="POvVocRiId6mtknk5Gcykf">decode_responses=True</code> 则让读出来直接是字符串，不用每次手动 <code data-page-node-id="Z3Y4nMobBGyi1IY9RaIjGk">decode()</code>。</p>
+
+<h3 data-page-node-id="xt9oKECilPXAYXqk6BYIRu">6.4 models/ — 用 Python 类画表</h3>
+
+<p data-page-node-id="tuvvkWWt57wcr9kXLxUuHr">四个文件共定义了 5 张表。写法称为「声明式（Declarative）」：继承 <code data-page-node-id="H15GnVY8I04h44qxCTBCHB">Base</code> → 用 <code data-page-node-id="SDLOuVbt0TjAbBsZXdFAvo">__tablename__</code> 指定表名 → 用 <code data-page-node-id="vA8rlkZXcBYEH93Ytk1aAM">Mapped[类型] = mapped_column(列类型, 约束...)</code> 声明每个字段。</p>
+
+<h4 data-page-node-id="BBJyZnxJtwQWEc9IWHfZgG">表结构一览</h4>
+
+<table data-page-node-id="Y3ZVQTvTX48yfcbniV2G5e">
+  <thead data-page-node-id="HCfKqiDQhbVwBIts72FSAy"><tr data-page-node-id="zIIFC5RZWcKq5jXXlkLASI"><th style="width:140px" data-page-node-id="YuMp1tjzCQlstNQLUdWRXz">表</th><th style="width:150px" data-page-node-id="lcPc3Mpf23xApoZQGugdyC">字段</th><th data-page-node-id="HVt84uM2NkGzC5PiozHvQu">约束 / 说明</th></tr></thead>
+  <tbody data-page-node-id="4HVCg6Z2fvteEXl1DXaxE5">
+    <tr data-page-node-id="RtUGIUrKvSbfPka9Fn6Yl1"><td class="mono" rowspan="11" data-page-node-id="RJc9jCJVKhLBjZURzhDto1">user<br data-page-node-id="rqWN0GNEUjF0pcdAp2OEWt"><span style="color:#888780;font-weight:400" data-page-node-id="BRwWHYHzoU44JfgjKlFQVf">User</span></td><td class="mono" data-page-node-id="qfUH9WAJa8HX1GCjZLHBXj">id</td><td data-page-node-id="9pB7gqOwgOvx3Oke2yuFug">主键，自增</td></tr>
+    <tr data-page-node-id="q84Dqs8NCNHQa5VakaJ3er"><td class="mono" data-page-node-id="JYi5MA1QzBnS6Pa0XHlZOG">username</td><td data-page-node-id="Pf8SuT4jpIFV8qiaDwAN00">String(50)，唯一，非空</td></tr>
+    <tr data-page-node-id="KRQt3gyFHkv4iu5J04cUwo"><td class="mono" data-page-node-id="e2zIYnEMHRRGmsG07jUyhY">password</td><td data-page-node-id="pvOkvJKOFjVFc7E4UkS6PV">String(255)，非空，<strong data-page-node-id="Hxk6vhpk8gnTpj8LVP0Vv3">存 bcrypt 哈希</strong>（所以要 255 这么长）</td></tr>
+    <tr data-page-node-id="pKNkYSTmHF74Vd6KdDENZV"><td class="mono" data-page-node-id="MfA4ad2jYZCC9jYyLTRuy9">nickname</td><td data-page-node-id="Xyj5qqTHaEBDHdUv1bfceK">String(50)，可空</td></tr>
+    <tr data-page-node-id="unuMOcpFb50JEDQJmXYfVv"><td class="mono" data-page-node-id="z5zwH7xqksojNJdFidGhv2">avatar</td><td data-page-node-id="THak8KmFV8OSxuBbdusy9Z">String(255)，默认一张猫图占位</td></tr>
+    <tr data-page-node-id="or4WLBKIZGV6jIHO6L8gvH"><td class="mono" data-page-node-id="r11nlJ7dGfdVRFRSzHnMKX">gender</td><td data-page-node-id="q1jc0iNIsKNMOUxaGf9ZFw">Enum('male','female','unknown')，默认 unknown</td></tr>
+    <tr data-page-node-id="2bdCtWYlz7euEEJ1MVPpci"><td class="mono" data-page-node-id="bqpDDuOMVZqJKVk9uIQfLY">bio</td><td data-page-node-id="JVryFcgYrDiJ6yIYiR7I23">String(500)，默认「这个人很懒，什么都没留下」</td></tr>
+    <tr data-page-node-id="Vsi7PJkuY7bZLGm1IqfvZu"><td class="mono" data-page-node-id="RotGCOdPhjCCCy3ZN0UJ1X">phone</td><td data-page-node-id="Hx0ckYaahavB5zpx3jN3QE">String(20)，唯一，可空</td></tr>
+    <tr data-page-node-id="wV7NyDvoQ7SajiD85fGVyH"><td class="mono" data-page-node-id="cckBa3cVbvyaHR8ic8VjIL">created_at</td><td data-page-node-id="iqeR2ThzF5vjt0zhvfqKXb">默认 <code data-page-node-id="qkiCOraYdDFc9kVTSIJr9T">datetime.now</code></td></tr>
+    <tr data-page-node-id="FFx37sSucfPEEXagIVO7H9"><td class="mono" data-page-node-id="K9fWe6g6YMHl3XqhktTaEY">updated_at</td><td data-page-node-id="xmFsTPIuk98NmGaaDqGMCh">默认 now，<code data-page-node-id="xyzCTuiBIvuTIYAUV4YkbU">onupdate</code> 每次更新自动刷新</td></tr>
+    <tr data-page-node-id="11PX6iFgr9wdCgN5tJqamt"><td colspan="2" data-page-node-id="eqiErCS4OcTCRLxUghwaCa"><em data-page-node-id="CMJWtGaJ44AXLDY7bRZJFz">注意：<code data-page-node-id="hMEW37x5hGT7PM57wmsupW">default=datetime.now</code> 传的是函数引用（不带括号），SQLAlchemy 会在插入那一刻才调用它。写成 <code data-page-node-id="MXi6vaVwlitv1kRy6rapMI">datetime.now()</code> 就变成「模块导入时算一次」，所有记录时间都一样了。</em></td></tr>
+
+    <tr data-page-node-id="g15QOzNavIKSW7hJrklJmn"><td class="mono" rowspan="5" data-page-node-id="JNwdzkLP9YhME0MvsDWtP7">user_token<br data-page-node-id="mhUd7hH04saAKx9k6fi0HE"><span style="color:#888780;font-weight:400" data-page-node-id="XvYIE1Z13Dy8iMJOkhxATP">UserToken</span></td><td class="mono" data-page-node-id="ivKuaeSF2e3OUywHvh9E4b">id</td><td data-page-node-id="ZEt2HhaSML3o18xSBfAgZR">主键，自增</td></tr>
+    <tr data-page-node-id="NbdQvSWk2Vtb6F23PT9yge"><td class="mono" data-page-node-id="qv0EQfrxIkNjbYEyOd6vOY">user_id</td><td data-page-node-id="x7g2FdAYc99TWPxWzOgeat">外键 → <code data-page-node-id="qgOYd5ZJYwaBI4FqttCmFD">user.id</code>，非空，带索引</td></tr>
+    <tr data-page-node-id="jdXycoFcYHcm8RH1J7WX8D"><td class="mono" data-page-node-id="lzukAkMPorvABK1LYPOwT5">token</td><td data-page-node-id="LxqFTQgCzyZJJMbqFFGNPD">String(255)，唯一，非空</td></tr>
+    <tr data-page-node-id="MzFrytlLFFofQxO82iDk1U"><td class="mono" data-page-node-id="XYZ6glGpC6wGm2Cj17HjDR">expires_at</td><td data-page-node-id="hq1Kx3HxRNFwkm8yljnLTy">非空，校验时判断是否早于当前时间</td></tr>
+    <tr data-page-node-id="8bTRbVa6ubMnFEPMVz4Fax"><td class="mono" data-page-node-id="uUmhIXpcN5Xm2ovwahj7Ef">created_at</td><td data-page-node-id="nd4ILxPSfErC7pMZUVbwKR">默认 now</td></tr>
+
+    <tr data-page-node-id="vaGUwMGZLjPexkaM2yNIBT"><td class="mono" rowspan="4" data-page-node-id="qpragsAcn3mS0ZP4wZLwKp">news_category<br data-page-node-id="T5OFjNgoHkC1GRDDUwot23"><span style="color:#888780;font-weight:400" data-page-node-id="yepQoY4W79TJ4b4bBfUDGD">Category</span></td><td class="mono" data-page-node-id="7yDoJbFwR6VV0jDQmXUQ1y">id</td><td data-page-node-id="VZ3Qu0SGA5TIi52TzrAfjC">主键，自增</td></tr>
+    <tr data-page-node-id="BHrE1Le3F2sSPAmSGoOaL0"><td class="mono" data-page-node-id="pLEqHiGBRAEC2cj8NPbzAB">name</td><td data-page-node-id="kwU6fWT7AGg67snw0Up9rX">String(50)，唯一，非空</td></tr>
+    <tr data-page-node-id="L1b8FhRSI6VJ3z4PDmgA4a"><td class="mono" data-page-node-id="hInCttEHAtIudhgmDCbD6D">sort_order</td><td data-page-node-id="dIP1RCKFunHFbjDaGDAZzX">Integer，默认 0，控制前端展示顺序</td></tr>
+    <tr data-page-node-id="aNhwPIy8QqNiYHyNxjXvT8"><td class="mono" data-page-node-id="Xk6Et7oYBeSdwYWwj2PvGC">created_at / updated_at</td><td data-page-node-id="dWmzTYsBTtLDsBM26P7ivs">从 <code data-page-node-id="HKsz3oR146yRBHf5OMkpP4">Base</code> 继承而来</td></tr>
+
+    <tr data-page-node-id="wbDeIEbhSx1jJrOT7hhpTf"><td class="mono" rowspan="9" data-page-node-id="KPJe8ymMY8KBzFcSUsQIGL">news<br data-page-node-id="7ZCSMnZ0R8bVztWTs8QPgI"><span style="color:#888780;font-weight:400" data-page-node-id="EZ5AUSatd7K97kEtLWBGUf">News</span></td><td class="mono" data-page-node-id="29rqVNkHx7eNBvWx78AMXy">id</td><td data-page-node-id="FOI8ZsMk18SKvPfj5X6V3M">主键，自增</td></tr>
+    <tr data-page-node-id="2rvMBuFX78UxXBIkpbaea8"><td class="mono" data-page-node-id="2fBgEHni6FMbD4bARAXyzR">title</td><td data-page-node-id="FbvJ1cWFcZqoaDDRtIfLPB">String(255)，非空</td></tr>
+    <tr data-page-node-id="5hso5AlOrILdgvgDnzcSpI"><td class="mono" data-page-node-id="5GhWM1hXi7qcEZTQ841Vgl">description</td><td data-page-node-id="QWw4JXGKkmBItOWwYzEmLZ">String(500)，可空</td></tr>
+    <tr data-page-node-id="lHwEK8E5owcHy8glUUTJz9"><td class="mono" data-page-node-id="c43t1ZA7IdHEFuvcQQQ153">content</td><td data-page-node-id="rU2xHf6dXBayjD8GCp9RFe"><strong data-page-node-id="QDNCBEmacT5ihbiWwYjKOW">Text</strong> 类型（适合几万字长正文）</td></tr>
+    <tr data-page-node-id="fDkaoiaxFsBurzMS1jOwvq"><td class="mono" data-page-node-id="bMFngEWrwQzZVqpAGN4ZjW">image / author</td><td data-page-node-id="2Y6JNSd9Gv4BzC4WC962Ov">可空</td></tr>
+    <tr data-page-node-id="4kpYmT6kiJa1rvhfwXsvIq"><td class="mono" data-page-node-id="UZT5mNYLbc1IVo0D4ChuUo">category_id</td><td data-page-node-id="IbsSeJuUu7G9CUxIbt2QOW">外键 → <code data-page-node-id="6fqnHi6n1IIueXvnLhKFD3">news_category.id</code>，非空，带索引</td></tr>
+    <tr data-page-node-id="hOLAmt3Pc532Bg0wV4rpQp"><td class="mono" data-page-node-id="cX6b9ExU5pFrxfxlceWKJ9">views</td><td data-page-node-id="zRDSF2kNfqbXtWmjcNnxec">Integer，默认 0，带 <code data-page-node-id="ciDrGT2hipEFJC1hGtDjZz">publish_time</code> 一起建索引</td></tr>
+    <tr data-page-node-id="bMn7cgqPUHdNNkanUyqd74"><td class="mono" data-page-node-id="TxwB8tst44GNEKdyQPQOXC">publish_time</td><td data-page-node-id="FVrOTPqfjRYNONv3Tyi9cM">默认 now</td></tr>
+    <tr data-page-node-id="vK2pMIxGnz4yTZ4vb3FvL1"><td colspan="2" data-page-node-id="VjYAa2jkMaRte2VlfNrjc1"><em data-page-node-id="iArEmAmogdxjzpcVHO5BKt"><code data-page-node-id="o9gGKz4tt2HCGlMh49LG9F">__table_args__</code> 里建了两个索引：<code data-page-node-id="HmMjM2RtxIfi4JaEgm1OcH">fk_news_category_idx</code>（加快按分类查）和 <code data-page-node-id="RCscLGfl9AsDoqh9rv2ygX">idx_publish_time</code>（加快按时间排序）。索引就像书的目录，查询快但写入稍慢。</em></td></tr>
+
+    <tr data-page-node-id="gBEbzeklBLD1kncfNyBR8j"><td class="mono" rowspan="5" data-page-node-id="nZXV0qgNm8iPxE2CVksZSn">favorite<br data-page-node-id="FlKEuTy8EsAId1vVDkOQUB"><span style="color:#888780;font-weight:400" data-page-node-id="MVLgiZOpVPXdBWuN3CMl1j">Favorite</span></td><td class="mono" data-page-node-id="y5gIyYThZfwoSUFJx6pFBO">id</td><td data-page-node-id="BwcgwCJHqXsawCcEKCeEt2">主键，自增</td></tr>
+    <tr data-page-node-id="djGdxAYfmmUm792njTNaqv"><td class="mono" data-page-node-id="AT1Q09Rrl1PBmSFbB3dmwo">user_id</td><td data-page-node-id="BQKHAE5viv7UHLp2pNkB4H">外键 → <code data-page-node-id="eSeWjCYassxZ8VKhy6iSPr">user.id</code>，带索引</td></tr>
+    <tr data-page-node-id="NvqV9enL7PIAEGpC73KEym"><td class="mono" data-page-node-id="WjHFg4U3rxe8HPTCkds96X">news_id</td><td data-page-node-id="PoyGkbgrT522wV5eSNY6Xl">外键 → <code data-page-node-id="QHFD6JAJfimc8MqYrzaXhA">news.id</code>，带索引</td></tr>
+    <tr data-page-node-id="poCVeA0WObEc6XzlqVuM4L"><td class="mono" data-page-node-id="8xgLiH0W358CeZjkDshFsY">created_at</td><td data-page-node-id="sE8dYApRh7BD58oFJMv19w">收藏时间</td></tr>
+    <tr data-page-node-id="zTlPHYE6ixPwQ6nqdHHvFQ"><td colspan="2" data-page-node-id="AAGNtqqbl3WzQsLuXwhUQN"><em data-page-node-id="NFATS6Fuk2GZW24LpqzMTc"><code data-page-node-id="84pECmNmqfYlvfQlLGkxpp">UniqueConstraint("user_id","news_id")</code> —— 联合唯一约束，数据库层面保证「同一用户对同一新闻只能收藏一次」。</em></td></tr>
+
+    <tr data-page-node-id="zQ2RAB8biHuBhKq8OOfNtR"><td class="mono" rowspan="4" data-page-node-id="SfyFq2bft7rr4uChTakN26">history<br data-page-node-id="DI63ZA1gJxDTxcORjkWvFn"><span style="color:#888780;font-weight:400" data-page-node-id="aIejj7wJEQYuQQOrYRBnCk">History</span></td><td class="mono" data-page-node-id="4qp0x6qNPwI1u0pcyVbx8g">id</td><td data-page-node-id="FTKoXDj8z2nj4fnXujQ2XL">主键，自增</td></tr>
+    <tr data-page-node-id="ZXwomgXZ10BFHEfub4Lwxc"><td class="mono" data-page-node-id="G6QzNsfKvXc8bcAXNv9tRD">user_id</td><td data-page-node-id="OnfCMeiM8ukSNPA3KWMpWS">外键 → <code data-page-node-id="LOjw82kcZu55lA4abxjiTc">user.id</code>，带索引</td></tr>
+    <tr data-page-node-id="9cFROS429hMKhALzudHxC9"><td class="mono" data-page-node-id="KjrXRwcu1NmMFTlFZSjoNU">news_id</td><td data-page-node-id="zaSubbFNT90R7eFcBkGVcw">外键 → <code data-page-node-id="nkfCkx1zONMqfQZEf1db7I">news.id</code>，带索引</td></tr>
+    <tr data-page-node-id="nVGDxXoqCAj7jCne7JvXxE"><td class="mono" data-page-node-id="LWmjx0s88y3wpDbsN8IO3L">view_time</td><td data-page-node-id="x1DLqLbirdjwZBDS6cU1q4">浏览时间，带索引（列表按它倒序）</td></tr>
+  </tbody>
+</table>
+
+<h4 data-page-node-id="9ODa0GDEt0neKfVXw1E0BY">关于 Base 抽象基类</h4>
+
+<p data-page-node-id="KgqWy4PzlGV8mOdEThgdDi"><code data-page-node-id="a659PDlSCndCEgtTHsEMHM">class Base(DeclarativeBase)</code> 加 <code data-page-node-id="QfJOLRK7FZICMKnoNHUC8o">__abstract__ = True</code> 表示「我自己不是一张表，只是给子类当模板」。如果漏了这行，SQLAlchemy 会试图把 <code data-page-node-id="PZObBtqPGDiim5JELtDlFe">Base</code> 本身也注册成一张表，启动时直接报错。</p>
+
+<div class="note warn" data-page-node-id="4Ajj2luGVALPj9pCElxZus">
+  <span class="lbl" data-page-node-id="YhameCLpMvM8DZzlreoXtt">这里有一个结构性问题</span>
+  <p data-page-node-id="rhLFyBGNr3ZaDK9tGynWCU">四个 models 文件<strong data-page-node-id="CfeDAw0zH7lNVPo1hTo2nA">各自定义了一遍 <code data-page-node-id="smqiME9yKzJlDrYdHNVE3h">Base</code></strong>（见第 9 节 P1-6）。这意味着项目里存在 4 套互不相干的 <code data-page-node-id="w1RLJ9jKFvCQYeAcmNYV7P">metadata</code>。而且 <span class="file" data-page-node-id="Dy8WP7ZFXxkanX0mH57jNh">models/news.py</span> 的 <code data-page-node-id="1uJDU4Y6HdY93VzmZtGkLg">Base</code> 里塞了 <code data-page-node-id="9NQMZhiaihRv97A2CisAMW">created_at</code> / <code data-page-node-id="l6Ii0ur2wg4ykuLGBNVHsb">updated_at</code> 两个公共字段，另外三个文件的 <code data-page-node-id="MEgPIXWjnHJ73OFh8Tcbj3">Base</code> 是空的——所以 <code data-page-node-id="HlmH0AG8iE1Q2SEy7CZBdF">Category</code> 会「顺带」多出两列，而 <code data-page-node-id="t2fOkefoD53uhO9vJ6CJSG">Favorite</code> 不会。这种不一致会让建表脚本很难统一，建议抽到独立的 <code data-page-node-id="3a5zl8pq8qW4BJznpjdf9X">models/base.py</code>。</p>
+</div>
+
+<h3 data-page-node-id="2mtNopNwPRFDdkd6HoVnz9">6.5 schemas/ — 接口的数据契约</h3>
+
+<p data-page-node-id="nrLTN2Az0fXYxfZJfuD0dT">Pydantic 模型干两件事：<strong data-page-node-id="SXTSHQDpdhixQnElYjK8R2">校验进来的数据</strong>、<strong data-page-node-id="8QvcH1FdCFNCAMlp9Gr3wx">规范出去的数据</strong>。这里最关键的一个设计是：<strong data-page-node-id="aCBknIGN51obRrNOn6ZKtL">schemas 和 models 是两套完全独立的类</strong>。</p>
+
+<div class="cards" data-page-node-id="0xCoE7vrm3gWXsEPtSW9c9">
+  <div class="card" data-page-node-id="qmpaSECXqfbSEI48erqWBW">
+    <span class="tag" data-page-node-id="7P856TVMlpw6YBymHguHjg">models/users.py</span>
+    <h4 data-page-node-id="Qm0kpaGBEZHHXNxDfQ4qwc">User · 数据库的脸</h4>
+    <p data-page-node-id="XgsPEqoai59PcGx8Ul71P9">描述数据库表结构，<strong data-page-node-id="6BZE1WzCxJB13VEqiHNsy5">包含 password 字段</strong>。它只在内网（和数据库之间）流转，不出现在响应里。</p>
+  </div>
+  <div class="card" data-page-node-id="BGAa0OwXvCtJ6mNGLKfHMP">
+    <span class="tag" data-page-node-id="WunYDWYgWAOqHlbAEIo3TE">schemas/users.py</span>
+    <h4 data-page-node-id="K5l4BC9sWFK7BixeYSZRNf">UserInfoResponse · 接口的脸</h4>
+    <p data-page-node-id="THtk0uDCHYD04voSgqFE76">描述返回给前端的结构，<strong data-page-node-id="8Z5N3rFehCnNcnNsNHBZFm">从设计上就没有 password 字段</strong>。所以即使代码写错也无法泄露密码。</p>
+  </div>
+</div>
+
+<p data-page-node-id="f6Z67FKUGdhnDbKztnP9X3">这就是「<strong data-page-node-id="Oa4dfpbXdck8HGbSp22hub">默认安全</strong>」的思路——不是靠记得手写 <code data-page-node-id="ixlhSsVu7Pzy8307Bb1Dv1">del user.password</code>，而是靠结构本身让错误不可能发生。</p>
+
+<h4 data-page-node-id="Rnm2D1oRFonlmoufk8x8iN">camelCase 别名机制</h4>
+
+<p data-page-node-id="4PTaxWM38RDvE2AuKFqzfj">数据库字段是下划线风格（<code data-page-node-id="Jw6NT2seH4WSokdw6BEvvP">category_id</code>），前端习惯小驼峰（<code data-page-node-id="XyxCGZAAVhxptwExjFc0RD">categoryId</code>）。Pydantic 的 <code data-page-node-id="uR0oT0gMGQ1F0qBgtB7X3Q">Field(alias=...)</code> 负责这两套命名的自动翻译：</p>
+
+<pre data-page-node-id="dpHLNRgLaspCOHH1D9PxmO"><code data-page-node-id="WjkK1mDEAC7n8aLiqLjXU3">category_id: int = Field(alias="categoryId")     <span class="cmt" data-page-node-id="DTI7stPCeB5ZoyFPuGGrzP"># 输出 JSON 时自动变成 categoryId</span>
+
+model_config = ConfigDict(
+    from_attributes=True,    <span class="cmt" data-page-node-id="xX4eGZgzXJ5F9UjozWy1NP"># 允许 model_validate(ORM对象) 直接从对象属性读值</span>
+    populate_by_name=True    <span class="cmt" data-page-node-id="kElAdOzHQ3K3eHKm2ktXSL"># 同时也允许用字段名 category_id 构造，两边都能用</span>
+)</code></pre>
+
+<p data-page-node-id="oHf5sFK0WbNkrglTdeJOIq">这几个开关的分工要记清：</p>
+<ul data-page-node-id="UmPmRb71R6DqiDP520KLKr">
+  <li data-page-node-id="pIy7YoPub3wYY6P4yhzvLG"><code data-page-node-id="BdMkXVcVr9ZbgyEAvalzds">from_attributes=True</code> —— 没有它，<code data-page-node-id="vSR6f0jvUtuWpGn3TeW1FT">UserInfoResponse.model_validate(user)</code> 会失败，因为它不知道怎么从一个 ORM 对象里取值</li>
+  <li data-page-node-id="FwFbFCL8Y5rTZq1C1COzLN"><code data-page-node-id="Op9g52cJE1gg3TIqCXjBPG">populate_by_name=True</code> —— 没有它，就<strong data-page-node-id="1VqfYrQlXxIgCZxeu9TuD7">只能</strong>用别名（<code data-page-node-id="RBmsYKNjsPSTiTvXLqnr0O">categoryId</code>）构造，不能用字段名（<code data-page-node-id="vFuaIN37lqvD2bhxYUPaFI">category_id</code>）。项目里两处代码各用一种写法，所以必须开</li>
+</ul>
+
+<h4 data-page-node-id="pUX59TUnQuarJK29p4MB4x">继承与复用</h4>
+
+<p data-page-node-id="zigUhoEEpAM2CvPVvTxCil"><span class="file" data-page-node-id="f6mMlFfO4MxhzT5VNAklFs">schemas/base.py</span> 的 <code data-page-node-id="2q5YQD6nDPun9nE0MxJ8xe">NewsItemBase</code> 是个典型的「抽公共字段」手法：</p>
+
+<pre data-page-node-id="dMaWAk6K3aJCyBs4zAQnOd"><code data-page-node-id="d8RtYcThEGtyo3V5TcPXok">NewsItemBase (id/title/description/image/author/categoryId/views/publishTime)
+    │
+    ├── NewsDetailResponse      + content + relatedNews
+    ├── FavoriteNewsResponse    + favoriteId + favoriteTime
+    └── HistoryNewsItemResponse + historyId + viewTime</code></pre>
+
+<p data-page-node-id="E8H4DQDXCaxf52MzhSt9mL">好处是新闻的字段只定义一次，三处接口的字段名永远一致；坏处是改基类会同时影响三处——这正是 <code data-page-node-id="rCYuHK1niJerJtvxGKo6pC">schemas/base.py</code> 单独成文件的意义：<strong data-page-node-id="2oKQO8usZnEzhDn8qqL43u">提醒你这里动一下，三处都会变</strong>。</p>
+
+<h3 data-page-node-id="keSjef6EP4WcDdO6CXwwHo">6.6 crud/ — 只和数据库打交道</h3>
+
+<h4 data-page-node-id="1MRYBJ1RepgLyuTAG1s28q">crud/users.py 的 7 个函数</h4>
+
+<table data-page-node-id="yfAEy6GjVLLWgEyVSK7xDx">
+  <thead data-page-node-id="it2EyznilXGRjPHfRYxYsR"><tr data-page-node-id="xYvZfghS3xXJCnR6TksZLm"><th style="width:200px" data-page-node-id="qlsjK9PylgK4Nmo0F8ZrDX">函数</th><th data-page-node-id="3CyozUYuhJC7IKBtLsSJ3w">做什么 / 关键细节</th></tr></thead>
+  <tbody data-page-node-id="vXPYDM4MQtzo784YcnwaXW">
+    <tr data-page-node-id="XDxp1ocr5SBn611DpML3t2"><td class="mono" data-page-node-id="bqJYzJ8DCOWh4sMvMqaZ03">get_user_by_username</td><td data-page-node-id="rhQXTEQjQBtXxSyvhcBsSP">用 <code data-page-node-id="CJGcZ6RpgrXBhECjxSI5i7">scalar_one_or_none()</code> 取值——查不到返回 None 而不是抛异常，这是和 <code data-page-node-id="CCfchMm7DoD3rej1LXGJwO">scalar_one()</code> 的关键区别</td></tr>
+    <tr data-page-node-id="og1aiLr39tsRavNRAQ3CC9"><td class="mono" data-page-node-id="cWFFEGtcOXjQASas2UTpiM">create_user</td><td data-page-node-id="tW496v2tXxIzmqEGIO71NJ">先 <code data-page-node-id="MsrgwHWeWxdHXd3qU6k1Xv">get_hash_password()</code> 加密 → <code data-page-node-id="jPxDrP4lkSJJ16KZMBqO7v">db.add()</code> 登记 → <code data-page-node-id="jmZtsdvkpT8Nkw39SD5sYy">commit()</code> 落库 → <code data-page-node-id="ZIRedAclRpecAHRDHWCsNr">refresh()</code> 拿回自增 id</td></tr>
+    <tr data-page-node-id="yuYMkJ8vVaGd3kPvY4z9T9"><td class="mono" data-page-node-id="pAEpmEREZFg5TU8Vn2g83P">create_token</td><td data-page-node-id="0lutqgYLCkZuD8HoFyihVk"><code data-page-node-id="fCPn9WXzWbhdGJFFGbLLls">uuid4()</code> 生成随机串 + 7 天有效期；先查该用户有没有 token，<strong data-page-node-id="ol6JnXgg4e2YIYuoYKfR9f">有就刷新、没有就新增</strong>（保证一个用户只留一条有效 token）</td></tr>
+    <tr data-page-node-id="eFCrg4D5n5RNH2qztzMo7h"><td class="mono" data-page-node-id="1m8KdT8pDgmQvTI2hBn1Kp">authenticate_user</td><td data-page-node-id="7BT3HT0wPtcaO9FfGST3SI">先按用户名找账号，找不到直接返回 None；再用 <code data-page-node-id="P7YsQBdkQ7GwXkT6pKhbu2">verify_password()</code> 比对哈希。两个失败路径都返回 None，<strong data-page-node-id="fGq3ESzEGGbvqkA6KF9yX4">不区分「用户名错」还是「密码错」</strong>——避免给攻击者提供线索</td></tr>
+    <tr data-page-node-id="wTX6XwIvGHqD16XrxIFB7k"><td class="mono" data-page-node-id="JF882b3ePVNmKdFzjtDqJI">get_user_by_token</td><td data-page-node-id="MCRf1q7HjHzEcz7dsOweWU">按 token 查出记录 → 判断 <code data-page-node-id="xndLFQWuG17jhBQ4z3fS5A">expires_at &lt; datetime.now()</code> 是否过期 → 有效则用 <code data-page-node-id="9C04Hio21IPWrr2PoAX1me">user_id</code> 再查 user 表返回完整用户</td></tr>
+    <tr data-page-node-id="4CzPMfvq5v1TkM1RoAAJHq"><td class="mono" data-page-node-id="RJkISnMJLwGnwQHUIvkrVi">update_user</td><td data-page-node-id="BRDF2BkJDqc1C02FnQYah4">核心是 <code data-page-node-id="Tdrn1YNKAhESpBSu2QQRvy">model_dump(exclude_none=True, exclude_unset=True)</code>——<strong data-page-node-id="0xMOkwPwhHwdAG8diS9HNX">只把前端真正提交过的字段拼进 UPDATE</strong>，没传的字段保持原值。返回 <code data-page-node-id="1ccypNPUykWeQgpi4Hh7RF">rowcount == 0</code> 时抛 404</td></tr>
+    <tr data-page-node-id="BZ4umKIpFsxpZilDGO9ahO"><td class="mono" data-page-node-id="5HOG4rNoI6beroWxyBA7U8">change_password</td><td data-page-node-id="riwK359GblRbwmy0Ifge9D">先 <code data-page-node-id="oxcKhbBONo6L5fN4An3hiy">verify_password()</code> 校验旧密码，错就返回 False；对则加密新密码写回。<code data-page-node-id="s5JjPhtflcFwLZauXPU57W">db.add()</code> 一个已存在的对象再 commit，SQLAlchemy 会自动生成 UPDATE 而不是 INSERT</td></tr>
+  </tbody>
+</table>
+
+<div class="note tip" data-page-node-id="WZyXViGqVUY4L5iBdTmnPh">
+  <span class="lbl" data-page-node-id="4t1DEQtJGb0ntbWb5BHCbK">exclude_unset 是个好东西</span>
+  <p data-page-node-id="0DU1xTOKD6uDjqON66BwBO">没有它的话，「用户只想改昵称」这个请求会把 <code data-page-node-id="7vKzqfEtoFKrNQrEsGDEEm">avatar</code>、<code data-page-node-id="YqpfFmWycKjJHkutxJs7cB">bio</code> 一起写成 <code data-page-node-id="bEpWpopE1QNkdfK9cYgwIE">null</code>，用户资料就被清空了。加上它，Pydantic 只输出「请求体里真的出现过的键」。<strong data-page-node-id="aRA2YPqpa5k0EaFCPXTM3j">写「局部更新」接口时，这两个参数基本是标配。</strong></p>
+</div>
+
+<h4 data-page-node-id="mufuFMkzs39uzNKXsZipDz">crud/news.py vs crud/news_cache.py</h4>
+
+<p data-page-node-id="lyqcRAh5ntyWnWXqpDlydM">两个文件是同一套查询的两种版本。区别只在于 <code data-page-node-id="MXdE6mlMAoDL1A3yR3B3nK">news_cache</code> 版每个函数都插入了缓存逻辑。对比 <code data-page-node-id="kS9lp9nGMfG5j57AzwOtwL">get_news_detail</code>：</p>
+
+<pre data-page-node-id="5HuEt0z2eyERPPcC8Gnuap"><code data-page-node-id="OTz4cMvDxGpzB1Gl4Pf5pM"><span class="cmt" data-page-node-id="aTs7rFwr6hWaJkCsNAUpmL"># crud/news.py —— 每次都查库</span>
+stmt = select(News).where(News.id == news_id)
+result = await db.execute(stmt)
+return result.scalar_one_or_none()
+
+<span class="cmt" data-page-node-id="5r9S1v6ViDsEjnoaMHtCAP"># crud/news_cache.py —— 先问缓存</span>
+cached = await get_cached_news_detail(news_id)
+if cached:
+    return _dict_to_news(cached)          <span class="cmt" data-page-node-id="63js7W3tlXh0AsmZMDHd3P"># 命中，直接返回，不碰数据库</span>
+stmt = select(News).where(News.id == news_id)
+result = await db.execute(stmt)
+news = result.scalar_one_or_none()
+if news:
+    await cache_news_detail(news_id, ...)  <span class="cmt" data-page-node-id="rY05xwiAuTfqo9HPtiKNg5"># 未命中，查完回写</span>
+return news</code></pre>
+
+<h4 data-page-node-id="PaGiKM2Df8wSyzBNE453Qo">crud/favorite.py 与 crud/history.py 的 join 查询</h4>
+
+<p data-page-node-id="90sAhuyh9gKMbeRGujWhMJ">列表接口要把「收藏记录」和「新闻内容」拼在一起，用的是 <code data-page-node-id="RKj2WD3FPzgNalAKJW4m6W">join</code>：</p>
+
+<pre data-page-node-id="Ujqv6a7LXlEEpSVdWyZNcp"><code data-page-node-id="j9lmMcOezMeP6EwQnakSLB">query = (select(News,
+                Favorite.created_at.label("favorite_time"),   <span class="cmt" data-page-node-id="quO6RQgPlmWoEdnBVLsTDu"># 起别名，避免和 News 字段重名</span>
+                Favorite.id.label("favorite_id"))
+         .join(Favorite, Favorite.news_id == News.id)        <span class="cmt" data-page-node-id="JNc8IiWPS80Ekm5UARe04T"># 两张表按 news_id 关联</span>
+         .where(Favorite.user_id == user_id)
+         .order_by(Favorite.created_at.desc())
+         .offset(offset).limit(page_size))
+rows = result.all()          <span class="cmt" data-page-node-id="5EwBXsC54XFDnKfeOs1u8V"># 每行是一个 (News, favorite_time, favorite_id) 元组</span></code></pre>
+
+<p data-page-node-id="Tl51Pw3InxJAFFAfyYG2Gs">路由层再用 <code data-page-node-id="5HWtlNAs6JoRD4jjNHEyiK">for news, favorite_time, favorite_id in rows</code> 解包。分页同时还要返回 <code data-page-node-id="IDLQHedOGcVqBVqtg6TE1C">total</code>，所以先单独跑一次 <code data-page-node-id="4ejpNg01r23z7fPiQdyPXA">count</code>。这也是一个常见模式：<strong data-page-node-id="gDKDxFcrRGeI5HxjBUmuhy">「取当前页」+「数总数」是两条 SQL</strong>。</p>
+
+<h3 data-page-node-id="apMfTmqPaJjJrIwh3xPx3U">6.7 cache/news_cache.py — 缓存策略</h3>
+
+<p data-page-node-id="BrFCjL4kBBCL7MgRD2Gaez">这一层的价值在「决定缓存多久、key 怎么拼」。同样的数据，变化越快缓存越短：</p>
+
+<table data-page-node-id="vq4nmBQ8yY49VACkX6RmeK">
+  <thead data-page-node-id="CTtGSuNMCC7GH8EK37cbSP"><tr data-page-node-id="FbjCrZW1jQpTSdb7SurDAF"><th style="width:180px" data-page-node-id="J9PyGaWhLdlI7PSENBJB6t">缓存对象</th><th style="width:280px" data-page-node-id="pmLMiscDUsn9ETtCUC0xaw">key 格式</th><th style="width:110px" data-page-node-id="dFeCDG1C9zNXyxYEiv9lzz">过期时间</th><th data-page-node-id="K8VHvspBPFz68gAIxtsZZd">理由</th></tr></thead>
+  <tbody data-page-node-id="inhKcuyOMGSrBu9Zjl9oi1">
+    <tr data-page-node-id="deikKjtnVfuULo7rzRMsAp"><td data-page-node-id="KsgLxjJGgWQBCdKbHff9jF">新闻分类</td><td class="mono" data-page-node-id="HhKGhDHC71rSiLqKEuhAG3">news:category</td><td data-page-node-id="i515y6o7758Cj9SCWJi3Gq">7200 秒（2 小时）</td><td data-page-node-id="mAkyQMbyhtA9lLoYHoyMvB">分类几乎不变</td></tr>
+    <tr data-page-node-id="3Kiag8gO7pUOB7HSs1z8dB"><td data-page-node-id="GKM6L8ZxLdnnAApTCpFh2R">新闻列表</td><td class="mono" data-page-node-id="TDbPNr04eKnl7ZY5t1brzo">news_list:{分类}:{页}:{每页}</td><td data-page-node-id="0LX9Fmc5GLCR8Gzb1UEnFL">1800 秒（30 分钟）</td><td data-page-node-id="Gy3SbzdUEytf32XTWsPf9P">会随发布、浏览量变化</td></tr>
+    <tr data-page-node-id="la1RDeZxRYqs4cYwR1D0A6"><td data-page-node-id="JgYooXvBKrwzZPSVfVDfTN">新闻详情</td><td class="mono" data-page-node-id="aTFXPPNTuk4xqwMyRctJR4">news:detail:{id}</td><td data-page-node-id="cuo2YFkEijOPD0fVBkE91Q">300 秒（5 分钟）</td><td data-page-node-id="crEOmgQT4RI8wmrLkTvuVc">单条内容可能被编辑</td></tr>
+    <tr data-page-node-id="SxXOM3FLOL6m1kt6ELfj8T"><td data-page-node-id="HbIF8IXR72x5fqts69rc6W">相关推荐</td><td class="mono" data-page-node-id="XiT2CMLLDHCmaiG3OY91Y1">news:related:{id}:{条数}</td><td data-page-node-id="vOo0jiEhOhhFXDvf1vPxma">600 秒（10 分钟）</td><td data-page-node-id="SVJCvncJlDHN0mLHc9uB54">推荐结果实时性要求低</td></tr>
+  </tbody>
+</table>
+
+<p data-page-node-id="Ak30DXPSwb8xqO2QxJWaHQ">缓存 key 的命名约定是 <code data-page-node-id="SyTsxcz6DJO5Gci31qXuft">模块:对象:参数</code>，好处是运维时在 Redis 里 <code data-page-node-id="nPMjAZRBkMZtwDDMjtQOj8">KEYS news*</code> 一眼就能看出是什么。</p>
+
+<div class="note danger" data-page-node-id="iVMGmnudI8iDqMry2VLLRa">
+  <span class="lbl" data-page-node-id="OMSRlYkBR0vCQuWTcdLJPq">最容易犯的错：读写 key 不一致</span>
+  <p data-page-node-id="QbgG1qF0DfmEvBUVmFfPMC"><code data-page-node-id="8i1lbGdJqUdKSBdnZJTNss">set_cache_news_list()</code> 和 <code data-page-node-id="DSBl1UEr7f2nJc0gsmGq4n">get_cache_news_list()</code> 里都有同一行「<code data-page-node-id="VBs1pXUFZAcUwxok6xKoBC">category_id if category_id is not None else "all"</code>」的规范化逻辑，必须保持完全一致。<strong data-page-node-id="ul3YJNSS1JEVbGGBBNgOa9">只要读写两边的 key 拼接差一个字符（比如一边是 <code data-page-node-id="LTwUasujqEvP4A9eB71UJr">None</code> 一边是 <code data-page-node-id="C9cMGK5Nw1tKbLAfWyfDnh">all</code>），缓存就永远命中不了</strong>，而且不会报错——接口照样返回正确数据，只是每次都查库，性能问题非常隐蔽。</p>
+</div>
+
+<h3 data-page-node-id="XFMNk7PGO8QAcLg64SwzG8">6.8 routers/ — 对外的大门</h3>
+
+<p data-page-node-id="buM5kVNzxAsyJfGBAFQX6A">每个 <code data-page-node-id="jSwfifRO51thgfoqacsX2r">@router.xxx</code> 装饰的函数就是一个接口。路由层的固定套路是：</p>
+
+<pre data-page-node-id="fCXJsw5RFv9X4duwDM1KYb"><code data-page-node-id="XkKIgXWeAeUEV7J1w6eOB3">@router.post("/add")                                      <span class="cmt" data-page-node-id="NNN3weYFqwx5duJAAgXYdO"># ① 声明路径和请求体类型</span>
+async def add_favorite(
+        body: FavoriteRequest,                            <span class="cmt" data-page-node-id="sBxM7CuEiTccjlzEB2YEjF"># ② Pydantic 自动校验入参</span>
+        user: User = Depends(get_current_user),           <span class="cmt" data-page-node-id="5H1CeIn9MUFQJ0siBh6HHH"># ③ 认证依赖，失败自动 401</span>
+        db: AsyncSession = Depends(get_db)                <span class="cmt" data-page-node-id="PeWXPpZpUbomRaOIPH7bZv"># ④ 注入数据库会话</span>
+):
+    result = await favorite.add_news_favorite(db, user.id, body.news_id)   <span class="cmt" data-page-node-id="nTELrVvLDYsD2fehyq0Ruw"># ⑤ 调 crud</span>
+    return success_response(message="添加收藏成功", data=result)            <span class="cmt" data-page-node-id="QSs2EXS3WsAwQH0BC8qpXv"># ⑥ 统一格式返回</span></code></pre>
+
+<p data-page-node-id="TGFTHrV9v012vHQcGOQcdp">几处值得单独注意的技巧：</p>
+
+<h4 data-page-node-id="dG4K7LXeYm3oalZ1Wo2qHu">Query 的 alias：给前端 camelCase 的参数名</h4>
+<pre data-page-node-id="NcM7vRCzD4yPY8pdPkq5Hc"><code data-page-node-id="1HTFYOZWpYRNIOqYo4JKfq">category_id: int = Query(0, alias="categoryId")            <span class="cmt" data-page-node-id="fF8jJvbvUUPtegTl3kIhTC"># URL 里写 categoryId，Python 里叫 category_id</span>
+page_size: int = Query(10, alias="pageSize", le=100)       <span class="cmt" data-page-node-id="pfUgCD6Kg1rmrG8KOBznmH"># le=100 限制每页最多 100 条</span>
+news_id: int = Query(..., alias="id")                      <span class="cmt" data-page-node-id="cACnrV11KBGL93TK3bqtvY"># ... 表示必填，不传直接 422</span></code></pre>
+
+<h4 data-page-node-id="HwtF8IUclu7tYUNGfLzCCm">_news_to_dict：手工做序列化</h4>
+<p data-page-node-id="0blC9XFzbVAFGDhR3RlB4H"><span class="file" data-page-node-id="AHz6iL0QivSmz9S8t4ii3N">routers/news.py</span> 里自己写了一个转换函数，把 ORM 对象转成前端要的 camelCase 字典（<code data-page-node-id="hNqxaXyOjzxCpWIqbhf8nE">category_id → categoryId</code>、<code data-page-node-id="EvFuiy7T9ac6cso0O4XDYz">datetime → isoformat 字符串</code>）。原因是 ORM 对象不能直接塞进 JSON。</p>
+
+<p data-page-node-id="sQkHkE4ctyQ9LaexE3LvhE">不过 <span class="file" data-page-node-id="aAhGOvUKIQDjf1aaLgFHHE">routers/favorite.py</span> 和 <span class="file" data-page-node-id="xUDgZYbFlywBYD2AjCirdL">routers/history.py</span> 用的是另一套方式——交给 Pydantic 模型（<code data-page-node-id="H3uxjFysDlQe2sr5pPGJOE">FavoriteNewsResponse</code>、<code data-page-node-id="PngEQJ932X10bWoFYCCQ2D">HistoryNewsItemResponse</code>）来做转换。<strong data-page-node-id="7icSQtYfTSLAZVSEbyZmGW">同一个项目里出现了两种序列化风格</strong>，这是第 9 节要提的不一致点。</p>
+
+<h4 data-page-node-id="n1XmgEWyhx7R3DGMl0sPmS">响应格式也不统一</h4>
+<p data-page-node-id="b74BD67Mf3uD2NcNa1KMmu"><span class="file" data-page-node-id="RKhB6irHGTDqFYu4u9GjTW">routers/news.py</span> 是手写字典 <code data-page-node-id="XsbxjUn9rfb6JVwwLMkJu9">{"code": 200, "message": ..., "data": ...}</code>，其它三个路由用的是 <code data-page-node-id="smmr9gMlOorJKboxltbANt">success_response()</code>。输出结果一样，但维护成本不同。</p>
+
+<h3 data-page-node-id="XIZHTPinojFYmaPo1sj4T7">6.9 utils/ — 横切工具</h3>
+
+<h4 data-page-node-id="QjKX1vmKll1Ghm5B9Yx8hi">security.py —— 密码为什么不能明文存</h4>
+<p data-page-node-id="43KmrLN5KouKxq1YSkTIW4">数据库一旦泄露，明文密码等于把用户所有账号（他们在别的网站可能用同一个密码）一起交出去。所以存的是 bcrypt 哈希，它的关键特性是<strong data-page-node-id="UDaRKnVTfAHJtunDPBEmYG">不可逆</strong>：只能「算出来 → 比对」，不能「从哈希反推明文」。而且每次加密会掺入随机「盐」，同一个密码每次哈希结果都不同，防止「撞库比对」。</p>
+
+<div class="note warn" data-page-node-id="3AIKkApAYg7JbqI44eKebo">
+  <span class="lbl" data-page-node-id="Npf0fycigdnLBCZSfjeOuW">环境里有个版本坑（代码注释里也写了）</span>
+  <p data-page-node-id="CdFwtOFR0XVRQc7x8ZQJMQ"><code data-page-node-id="HlskdONPmq4Z211E7MpLeM">passlib 1.7.4</code> 与 <code data-page-node-id="mCVFIodalDZX91likRI8NJ">bcrypt &gt;= 4.1</code> 不兼容，会导致加密直接抛错。必须锁定 <code data-page-node-id="DUXATgbl9xDkhYQL46D3V1">bcrypt == 4.0.1</code>。这类「依赖版本不兼容」是 Python 项目最常见的翻车点，值得记住。</p>
+</div>
+
+<h4 data-page-node-id="9raFUmHHZ1d9C8iLvWhdyx">auth.py —— 一行 Depends 完成认证</h4>
+<pre data-page-node-id="r3npJTWelM6x5gQKj7yClL"><code data-page-node-id="fXVCGtLh8AAMb1Sxpqb1Pb">async def get_current_user(authorization: str = Header(..., alias="Authorization"),
+                           db: AsyncSession = Depends(get_db)):
+    token = authorization.replace("Bearer ", "")     <span class="cmt" data-page-node-id="XUhpyZgMR91zQ9XzQAaEhm"># "Bearer abc" → "abc"</span>
+    user = await users.get_user_by_token(db, token)
+    if not user:
+        raise HTTPException(status_code=401, detail="无效的令牌或已经过期的令牌")
+    return user</code></pre>
+
+<p data-page-node-id="Ymu9YKmeWpmoDPfsUfAfqS">这是 FastAPI 依赖注入最漂亮的用法：业务路由只要写 <code data-page-node-id="soBZwqpiezrG8uniK5xgrE">user: User = Depends(get_current_user)</code>，就同时获得了「必须登录」和「拿到当前用户」两件事，一行搞定，且不可能忘记校验。</p>
+
+<h4 data-page-node-id="aMc4QWqFPloZh22oXv6kPo">response.py —— 统一响应</h4>
+<pre data-page-node-id="S3FpztAtki3YShAktGowjB"><code data-page-node-id="f9oxyux7oHki96vW52gFPt">def success_response(message="success", data=None):
+    content = {"code": 200, "message": message, "data": data}
+    return JSONResponse(content=jsonable_encoder(content))</code></pre>
+
+<p data-page-node-id="DmDSTD3pJJEh1zFZNkTTEA"><code data-page-node-id="DPmB98V4l4KWY95CLyxamU">jsonable_encoder</code> 负责把混在 <code data-page-node-id="bcQxVwGxdDZ6J9iEJYd4ox">data</code> 里的 Pydantic 对象、ORM 对象、<code data-page-node-id="gB7IxjGpdew5x6VVDNzReZ">datetime</code> 递归转成能序列化的普通类型，避免手写 <code data-page-node-id="St6IDzxitF8Fpm0fNKp0iU">json.dumps</code> 时报「Object is not JSON serializable」。</p>
+
+<h4 data-page-node-id="hEGAmUv7QpjTfq0ujUuIIq">exception.py + exception_handlers.py —— 全局兜底</h4>
+
+<p data-page-node-id="HUV6mWz6DAkFgM2MadoMKs">没有它的时候，任何 <code data-page-node-id="VkK1taqeLzST2Uy6kSIPmt">raise HTTPException</code> 都会返回 FastAPI 默认的 <code data-page-node-id="L0CHhZ69xLD3NSP9ubJGy5">{"detail": "..."}</code>，和正常响应的 <code data-page-node-id="mZ8OEgU99EON4tZmlVitur">{code, message, data}</code> 结构完全不同，前端要写两套解析逻辑。</p>
+
+<p data-page-node-id="B4wW69i2CxHhGNXvOz1ITj">加了之后，四种异常全部统一成 <code data-page-node-id="uwKJSlm5Y3XUylChwrL5pR">{code, message, data}</code>：</p>
+
+<table data-page-node-id="V9wIhHR9MFUJVajOJgCLtX">
+  <thead data-page-node-id="VP8S1N3kI2sWIulJEJ09oM"><tr data-page-node-id="D3KnhYbao2YLL9Lq1k8Q6p"><th style="width:210px" data-page-node-id="jnMrxWRolu4co3jEf0ZGGh">处理器</th><th style="width:110px" data-page-node-id="AMmEN4azfVFCyNAcqAlfOx">HTTP 状态码</th><th data-page-node-id="EFpNcDTgyoz1QImPv4fXB2">处理场景</th></tr></thead>
+  <tbody data-page-node-id="6IGsdq7hQmWD7rhbSRif7x">
+    <tr data-page-node-id="ekS45r6zasMw7NtdYeVZxX"><td class="mono" data-page-node-id="7dGc6w8ubrXPm6QJn4TYyN">http_exception_handler</td><td data-page-node-id="kjnweB922PYovIFQIl4lH0">原样透传</td><td data-page-node-id="5AfJuNEOpC4vPzMypxDMcd">业务主动抛的异常，如「用户已存在」（400）、「密码错误」（401）</td></tr>
+    <tr data-page-node-id="uDPvnAPY8qg45CLye37YvY"><td class="mono" data-page-node-id="5nNpsA09YptcDJaAekKZTF">integrity_error_handler</td><td data-page-node-id="dYXFNEz1v5pglbWRDai9A4">400</td><td data-page-node-id="dfQP8gL42IVWOSLlCHJFfd">唯一键冲突、外键失败。会把 <code data-page-node-id="XnFd7gKtZ2hKzuPFUbeUbt">Duplicate entry</code> 翻译成「用户名已存在」</td></tr>
+    <tr data-page-node-id="cfSmX4YxXzOpE5eBxrTJHj"><td class="mono" data-page-node-id="FdCL14BMvfnZEBZMQDlDPV">sqlalchemy_error_handler</td><td data-page-node-id="AEPTdtDu9KTbaRZW3B9wUQ">500</td><td data-page-node-id="DyEwxdf0nBCWNArRQzKCVt">数据库层面的其它错误</td></tr>
+    <tr data-page-node-id="ZcomRA2v9cQfu1zcl1sjFd"><td class="mono" data-page-node-id="AxAHiupYwG0JUMRjlvnaSF">general_exception_handler</td><td data-page-node-id="OaHOMFqVvkPF0WaHJGiCF4">500</td><td data-page-node-id="186oypAe3ZVAijjhR4jTbR">所有漏网之鱼</td></tr>
+  </tbody>
+</table>
+
+<div class="note" data-page-node-id="MyKOQhYcDgNnKSlCpaM6Cn">
+  <span class="lbl" data-page-node-id="0GpjY8G5GWzsmmboWnOueS">注册顺序为什么重要</span>
+  <p data-page-node-id="oQIAUPHyyamJQKBZsAJH2Z"><span class="file" data-page-node-id="ZtdnQHdVYndhOcFv8YzRAE">utils/exception_handlers.py</span> 里的注释写得很清楚：<strong data-page-node-id="5gjuulQqCZs9yWmL6JYIej">子类在前，父类在后；具体在前，抽象在后</strong>。因为 <code data-page-node-id="GVuFjhzFlkASUAsgzjuDFU">IntegrityError</code> 是 <code data-page-node-id="wB0xcLRXh6Iw5bCD255hJR">SQLAlchemyError</code> 的子类，如果把 <code data-page-node-id="ZAE8j78h7t3puhjTXG8tHO">SQLAlchemyError</code> 注册在前面，<code data-page-node-id="nZAedcgmHfCZduJvyFi3ei">IntegrityError</code> 就会被父类的处理器截胡，「用户名已存在」这种精准提示就永远出不来。</p>
+</div>
+
+<h2 id="s7" data-page-node-id="u4o905dLbCaKcPoxENCt9y"><span class="num" data-page-node-id="0u54HzOHk7yf1zQZKQYuZh">7</span>数据库表关系</h2>
+
+<figure data-page-node-id="HvXQuSlGwtKXwGFNIFLDmJ">
+<svg viewBox="0 0 680 400" xmlns="http://www.w3.org/2000/svg" style="font-family:inherit" data-page-node-id="l8im1d0pQF6El7laIp6zMw">
+  <rect x="255" y="30" width="170" height="72" rx="10" fill="#e6f1fb" stroke="#185fa5" stroke-width="0.5" data-page-node-id="U0l7NVqf5SkGYXxTPHxViP"/>
+  <text x="340" y="52" text-anchor="middle" font-size="13" font-weight="600" fill="#042c53" data-page-node-id="YKIa0NwRwJGNzED2dSkBE3">user</text>
+  <text x="340" y="72" text-anchor="middle" font-size="11.5" fill="#185fa5" data-page-node-id="dmTBC2eXNpYjQBEcXSBlau">id (PK)</text>
+  <text x="340" y="90" text-anchor="middle" font-size="11.5" fill="#185fa5" data-page-node-id="2x0q0HetbARmcNLU4hn9En">username / password / phone</text>
+
+  <rect x="30" y="160" width="150" height="66" rx="10" fill="#eeedfe" stroke="#534ab7" stroke-width="0.5" data-page-node-id="mrXVlbxnOnBua1OMjuDDof"/>
+  <text x="105" y="182" text-anchor="middle" font-size="13" font-weight="600" fill="#26215c" data-page-node-id="IPAlP3ouLHuevtJMzEr3XC">user_token</text>
+  <text x="105" y="202" text-anchor="middle" font-size="11.5" fill="#534ab7" data-page-node-id="V1XLChuYZoWpKuF61V5ooi">id (PK)</text>
+  <text x="105" y="218" text-anchor="middle" font-size="11.5" fill="#534ab7" data-page-node-id="8pY1AI867qdm3FqYnAsMAg">user_id (FK) · token</text>
+
+  <rect x="225" y="160" width="150" height="66" rx="10" fill="#e1f5ee" stroke="#0f6e56" stroke-width="0.5" data-page-node-id="iwOyOtxXWcZrj6aCeFaBEY"/>
+  <text x="300" y="182" text-anchor="middle" font-size="13" font-weight="600" fill="#04342c" data-page-node-id="IbQZWh10qP5ZtFza6KVhHM">favorite</text>
+  <text x="300" y="202" text-anchor="middle" font-size="11.5" fill="#0f6e56" data-page-node-id="7EFdD1wtTHfF6kpFMSR4Va">id (PK)</text>
+  <text x="300" y="218" text-anchor="middle" font-size="11.5" fill="#0f6e56" data-page-node-id="EhWMK440x8SZfm4Ka01pF6">user_id + news_id 唯一</text>
+
+  <rect x="420" y="160" width="150" height="66" rx="10" fill="#e1f5ee" stroke="#0f6e56" stroke-width="0.5" data-page-node-id="DOw5xUW2naAOiJa4pTUBDJ"/>
+  <text x="495" y="182" text-anchor="middle" font-size="13" font-weight="600" fill="#04342c" data-page-node-id="YrEMrMSkD7tnSFjJ3usGDj">history</text>
+  <text x="495" y="202" text-anchor="middle" font-size="11.5" fill="#0f6e56" data-page-node-id="sRoUJcQTdAzy0XnOXX02eH">id (PK)</text>
+  <text x="495" y="218" text-anchor="middle" font-size="11.5" fill="#0f6e56" data-page-node-id="Tg82W2jv4iLrYLvSEOkfjT">user_id · news_id</text>
+
+  <rect x="225" y="295" width="150" height="66" rx="10" fill="#faeeda" stroke="#854f0b" stroke-width="0.5" data-page-node-id="0eOgh9l9ytr8ykVu7HcM8p"/>
+  <text x="300" y="317" text-anchor="middle" font-size="13" font-weight="600" fill="#412402" data-page-node-id="j5PVFiWJAsWMuBtiTwhTa4">news</text>
+  <text x="300" y="337" text-anchor="middle" font-size="11.5" fill="#854f0b" data-page-node-id="WznuS2RA7HTEp5Q5m7xmMc">id (PK) · category_id (FK)</text>
+  <text x="300" y="353" text-anchor="middle" font-size="11.5" fill="#854f0b" data-page-node-id="0gd9S6Ct7AcvV5XoCMLFOa">title / content / views</text>
+
+  <rect x="450" y="295" width="150" height="66" rx="10" fill="#faeeda" stroke="#854f0b" stroke-width="0.5" data-page-node-id="CVZJBA8GpN4r8FLFFl2VVR"/>
+  <text x="525" y="317" text-anchor="middle" font-size="13" font-weight="600" fill="#412402" data-page-node-id="0YJHdVfwGm9s1BBm56qSdy">news_category</text>
+  <text x="525" y="337" text-anchor="middle" font-size="11.5" fill="#854f0b" data-page-node-id="PUMKPVvnvFjtDc7b7pyELj">id (PK)</text>
+  <text x="525" y="353" text-anchor="middle" font-size="11.5" fill="#854f0b" data-page-node-id="ZtyaDsE8zIC9uKxzZ30DNx">name / sort_order</text>
+
+  <path d="M280 102 L150 158" fill="none" stroke="#888780" stroke-width="0.5" stroke-dasharray="3 3" data-page-node-id="Uo8AFsnliF26bCrWNZPIDo"/>
+  <path d="M330 102 L310 158" fill="none" stroke="#888780" stroke-width="0.5" stroke-dasharray="3 3" data-page-node-id="PiUxH6QoRUtxCcJkrBQsvF"/>
+  <path d="M395 102 L480 158" fill="none" stroke="#888780" stroke-width="0.5" stroke-dasharray="3 3" data-page-node-id="1HCeTDaq7jBOGArSx7z1DL"/>
+  <path d="M300 226 L300 293" fill="none" stroke="#888780" stroke-width="0.5" stroke-dasharray="3 3" data-page-node-id="QaWNN2MpE8rDac5IJVzllV"/>
+  <path d="M495 226 L330 293" fill="none" stroke="#888780" stroke-width="0.5" stroke-dasharray="3 3" data-page-node-id="7tHGBArDOvn12nB0KVNxyr"/>
+  <path d="M375 328 L448 328" fill="none" stroke="#888780" stroke-width="0.5" stroke-dasharray="3 3" data-page-node-id="4o7ME26khy2fIYdRqAgktC"/>
+
+  <text x="30" y="385" font-size="11.5" fill="#888780" data-page-node-id="dqwmCdYlJFAIIBLsHXIRvf">1 对多：user → user_token / favorite / history　　　news_category → news　　　news → favorite / history</text>
+</svg>
+<figcaption data-page-node-id="0KhgefrOpzXSTPj6rktMT4">图 2 · 五张表的关系</figcaption>
+</figure>
+
+<p data-page-node-id="2fMyjqpE0ujFvYbzBzZ14K">关系读法：</p>
+<ul data-page-node-id="OdbBLYxD0RVpOQiB0Y1pC3">
+  <li data-page-node-id="xeNBUw8rkR46xthodQktgr"><strong data-page-node-id="c6upIOavFEAvJZYLZ0jKtO">user → user_token</strong>：一个用户一条令牌记录（业务上刻意限制成 1:1，登录会刷新同一个 token，而不是新增）</li>
+  <li data-page-node-id="LFOr10UL8GTQRm9cARRdng"><strong data-page-node-id="wJUkhY5HJwptPiDuGFxtmy">user → favorite / history</strong>：一个用户可以有多条收藏、多条历史</li>
+  <li data-page-node-id="igi2Sx7DKvlrifocag3DLG"><strong data-page-node-id="UiDEOCZQtINPvUrfQJHPeF">news_category → news</strong>：一个分类下有多条新闻</li>
+  <li data-page-node-id="9T3ZBP8VAchUGUz36TNqDM"><strong data-page-node-id="0sNaaPQcRw6OluD4P6Xqdb">news → favorite / history</strong>：一条新闻可以被多个用户收藏、被多个用户浏览</li>
+</ul>
+
+<p data-page-node-id="JPDwLfS0Jk6B6uv1H5LsMG">注意本项目<strong data-page-node-id="PQgUTVXz2WFjiy0RuMWV7P">没有使用 ORM 的 <code data-page-node-id="ytQQe8NqAtaAR0Y3uZlJrf">relationship()</code> 建立对象级关联</strong>，全部靠外键列 + 手写 <code data-page-node-id="PmzHvLNvzPtffaczh5hxmm">join</code> 查询。这在学习阶段是好事——你能清楚看到每条 SQL 到底怎么拼出来的。</p>
+
+<h2 id="s8" data-page-node-id="9NGk8HSgSMv49UthyiTUQf"><span class="num" data-page-node-id="VBDq81ImzbBgjQoG4MsODC">8</span>四个核心运行机制</h2>
+
+<h3 data-page-node-id="OWAcY50TiNiJa0A2y1ooTy">8.1 依赖注入与数据库会话生命周期</h3>
+
+<p data-page-node-id="EMWEuGPTsQHIyrbQ1TSNSu">这是整个项目最值得吃透的机制。流程是：</p>
+
+<pre data-page-node-id="BZQDPUXAIGhVQSbe5XWmPK"><code data-page-node-id="2CSqior59YKKxZUePdlSmj">请求进来
+  → FastAPI 发现路由参数上有 Depends(get_db)
+  → 调用 get_db()，执行到 yield，把 session 交出去
+  → 路由函数开始跑（用这个 session 查库）
+  → 路由返回结果
+  → 回到 get_db() 的 yield 之后 → commit() → close()
+  → 响应发给前端</code></pre>
+
+<p data-page-node-id="MaMEv5y0kJ7AJ9AvXqM323">注意 <code data-page-node-id="GoPdAWbxzU7kRvG684SJY6">Depends</code> 是可以<strong data-page-node-id="VykZtnLuGdxIrEIaxPvZrV">嵌套</strong>的：<code data-page-node-id="dyYhJrVLL8AR2VkrJHgAHZ">get_current_user</code> 自己又 <code data-page-node-id="1tyZ5661jCKC7DG8BcqWuy">Depends(get_db)</code>，而路由也 <code data-page-node-id="sWG00R1DaERFKAI3EF8GgF">Depends(get_db)</code>。FastAPI 在一次请求内会<strong data-page-node-id="wGrbhyNipEP7mDv4ENbuMC">缓存同一个依赖的结果</strong>，所以两边拿到的是<strong data-page-node-id="d1JedUz5SKxdrfGV64qe2h">同一个 session</strong>，不会重复创建连接。</p>
+
+<h3 data-page-node-id="AElAhjt7ftAdcHJvSAwbuc">8.2 Token 认证链路</h3>
+
+<pre data-page-node-id="63gNlRV2tcEfykOkXyAfXD"><code data-page-node-id="AMDbTIhvp9fnR5qA9klF84">注册/登录成功 → uuid4() 生成 token → 存 user_token 表（7 天后过期）
+        ↓
+前端保存 token → 之后每个请求带 Authorization: Bearer &lt;token&gt;
+        ↓
+get_current_user() → 去掉 Bearer → 按 token 查表 → 判断 expires_at
+        ↓
+有效 → 注入 User 对象　｜　无效/过期 → 401</code></pre>
+
+<p data-page-node-id="ip5Rg2H5ABalDugRPWfU9d">这套方案的特点：<strong data-page-node-id="WRFzmREmEK4KlnjsBa843Z">有状态</strong>（token 存在数据库里，所以服务端可以随时作废它，但每次请求都要查一次库）。生产环境更常见的做法是 JWT（无状态，不查库，但无法主动作废）或「随机串 + 存哈希」。学习阶段这套完全够用。</p>
+
+<h3 data-page-node-id="Q36q3Y4VAPsXXXZOrpW49k">8.3 旁路缓存（Cache-Aside）</h3>
+
+<p data-page-node-id="THnyGhRevnC8OI6InhCJrX">项目采用的缓存模式叫 Cache-Aside，是业界最主流的一种：</p>
+
+<pre data-page-node-id="O1183mbU0szJSEZUraxtWp"><code data-page-node-id="DJqt1GZt3GbEvwPt6cCnEC">读：先查缓存 → 命中就返回 → 未命中则查库 → 回写缓存
+写：改数据库 → （理想还要删掉相关缓存）</code></pre>
+
+<p data-page-node-id="dorBqR5fOBo0PryoHk4s3i">这里有个必须知道的事实：<strong data-page-node-id="cVhydebc6TSVX0CLeRArPd">本项目的写操作没有做缓存失效</strong>。也就是说，新闻浏览量 +1 之后，详情缓存里的 <code data-page-node-id="msCEsI4XgvkkPD35bE9A1h">views</code> 还是旧值，最长要等 300 秒才更新。</p>
+
+<div class="note" data-page-node-id="Go5ZUDzbfkLqOYFX3aiZZH">
+  <span class="lbl" data-page-node-id="wXkR41MqaRDd76aYqm983W">这是 bug 还是设计？</span>
+  <p data-page-node-id="hqthzAe3wXyJnfAUPELTBb">属于「可以接受但要知道」的设计取舍。新闻浏览量、推荐结果这类数据，短暂的不一致对用户体验没有影响，换来的是数据库压力大幅下降。</p>
+  <p data-page-node-id="C3vZx8ozx3U2VN2ALOkqAz">但如果换成「用户余额」「库存」这类数据，这种延迟就是灾难。判断标准是：<strong data-page-node-id="pMg1iCBxYlCmGyohHDESp2">这份数据允许多久不一致？超出这个时间用户会明显感知到错误吗？</strong></p>
+</div>
+
+<h3 data-page-node-id="trCdLIbif4dzLajP0lm89S">8.4 统一响应与全局异常</h3>
+
+<p data-page-node-id="TJiY4Xx3Wnif18Yu2HKznc">把「成功」和「失败」两条路径的输出都收敛到同一个结构：</p>
+
+<pre data-page-node-id="G3Al6mip2kx3YArXeSmMbr"><code data-page-node-id="YvPwnPRr4bDsYWCUHutFIT">成功：success_response(message, data)  →  {"code": 200, "message": "...", "data": {...}}
+失败：exception_handler(...)           →  {"code": 4xx/5xx, "message": "...", "data": null}</code></pre>
+
+<p data-page-node-id="w5sYe4JpopX8NuNbYGBzV4">这样前端只需要一套拦截器：<code data-page-node-id="WW56ikJGO8SGjWD2evQFW8">code === 200</code> 取 <code data-page-node-id="c65Q8rZgk3Ik4S5Ad2ojWk">data</code>，否则把 <code data-page-node-id="mp4nZWuPBHx7AouwmFw3Gq">message</code> 弹出来提示用户。<strong data-page-node-id="haBU9BUv4Jlkzvp3LUEByI">接口约定的稳定性，比接口本身的实现质量更能减少前后端扯皮。</strong></p>
+
+<h2 id="s9" data-page-node-id="KV1WXFfL04C63V3U7yCkVt"><span class="num" data-page-node-id="V6ur39a4E2lhHFPrCYNHbB">9</span>代码审阅：问题与改进建议</h2>
+
+<p data-page-node-id="nSKU5AHsViE7xd1N7rG15z">下面是通读全部 19 个文件后，我认为值得你留意的点。按「严重程度」排序，每条都给了具体的文件和原因。</p>
+
+<h3 data-page-node-id="BBv735XiHhFSzxn71yDQJN">P0 · 建议优先处理</h3>
+
+<h4 data-page-node-id="PYbvClvk2hf8e5faxHT2sG"><span class="sev p0" data-page-node-id="3T7crdCpi06t8udvA54Rkp">P0-1</span>删除历史接口的参数语义错误（真实 bug）</h4>
+<p data-page-node-id="g2lcevcouSTDwSPN11Jjcj"><strong data-page-node-id="sFDqXLeGoI5F1WQ85Zt9ld">文件：</strong><span class="file" data-page-node-id="poSuVVyppbTDzK9kJ74xOH">routers/history.py</span> + <span class="file" data-page-node-id="hseUoxkqXt0vmKTn1RionD">crud/history.py</span></p>
+<pre data-page-node-id="BL0GGzaibtxcjn7a8VRrHC"><code data-page-node-id="nZWxJbyIK6u8DHzLyrC19v"><span class="cmt" data-page-node-id="YmH1qqWy7QG7rSdxeJi45v"># routers/history.py 第 45-49 行</span>
+@router.delete("/delete/{history_id}")
+async def delete_history(history_id: int, ...):
+    result = await history.delete_history(db, user.id, history_id)   <span class="cmt" data-page-node-id="kPHenD9aRRVCLK0LueZA6Q"># ← 把 history_id 传成了第三个参数</span>
+
+<span class="cmt" data-page-node-id="97YxQkvHoTrgoGbTE5XnRd"># crud/history.py 第 43-46 行 —— 第三个参数的形参名叫 news_id</span>
+async def delete_history(db, user_id: int, <strong data-page-node-id="qUk6APVZkaapdA6h0hBk3V">news_id: int</strong>):
+    query = delete(History).where(History.news_id == news_id, History.user_id == user_id)</code></pre>
+<p data-page-node-id="EG9bZMdgLM27Bad2JRLyjX"><strong data-page-node-id="WHfALhy1dai3HsfMuMtFGW">后果：</strong>URL 里传的是「历史记录 ID」，SQL 却按「新闻 ID」去删。结果是 <code data-page-node-id="kVWlA8ea0fsp0ehXF1BA5r">DELETE FROM history WHERE news_id = {history_id}</code>——<strong data-page-node-id="R7eWauApTEKfb7Cxm0SYrx">要么删不到任何东西（返回 404），要么删错别人那一条新闻的历史记录</strong>。这是外键 ID 和业务 ID 混淆的典型案例，一定要修。</p>
+<p data-page-node-id="tEfS14mO2hb4wNDy3PZuDF"><strong data-page-node-id="JInaxKPDTKFry4xsS2WvSM">修法：</strong>把 crud 的函数改成按 <code data-page-node-id="8aFh1QClrYx5em29StRnAB">History.id</code> 过滤，并加上 <code data-page-node-id="iNckOgDiYSjmil4G8hQp9x">user_id</code> 双重条件（防止越权删别人的）：</p>
+<pre data-page-node-id="s5SxXS1di8dMlKwYOmjDV5"><code data-page-node-id="ZB9TejOEyiiqt25nwNIFdP">async def delete_history(db: AsyncSession, user_id: int, history_id: int):
+    stmt = delete(History).where(History.id == history_id, History.user_id == user_id)
+    result = await db.execute(stmt)
+    await db.commit()
+    return result.rowcount &gt; 0</code></pre>
+
+<h4 data-page-node-id="yE7yRpsKh1o9LeCXW1spvO"><span class="sev p0" data-page-node-id="ylAGhrGnaqsG7ZzUbJ2KzD">P0-2</span>重复收藏会返回「用户名已存在」</h4>
+<p data-page-node-id="mOsdVxzQsKXFLWBtLsLzxH"><strong data-page-node-id="zbY65c0ZK1qNCZ61TFDeK0">文件：</strong><span class="file" data-page-node-id="NUagNJ0UKbx0L99ayzHgej">utils/exception.py</span> + <span class="file" data-page-node-id="ZD2myZNUlrLmtpcqesZqpM">crud/favorite.py</span></p>
+<p data-page-node-id="Ygf6Ooa5d4W2Vnpmd8W8wY"><code data-page-node-id="uVId7oJW7BVfsV23uEDbnW">favorite</code> 表的 <code data-page-node-id="zMWZAYRvGXA3ArGDt3zkSf">(user_id, news_id)</code> 上方挂了联合唯一约束。用户重复点击收藏时，MySQL 抛 <code data-page-node-id="y2ZBbZtHL1AAnBYPnBU28I">Duplicate entry</code>，而全局处理器的判断逻辑是：</p>
+<pre data-page-node-id="6Qw0DuFBVMt3IIDq8ujIsO"><code data-page-node-id="1RI7Slu8fqhGiUq93FDq6d">if "username_UNIQUE" in error_msg or "Duplicate entry" in error_msg:
+    detail = "用户名已存在"      <span class="cmt" data-page-node-id="RMv0QsJiCgrerLHuwkmDTC"># ← 收藏重复也被塞进这个分支</span></code></pre>
+<p data-page-node-id="2T8DFxLeJDt9m8iCTH4qPA"><strong data-page-node-id="hb5u5vhmzePV67aF3xVuHb">后果：</strong>用户收藏失败，提示语却是「用户名已存在」，非常困惑。而且 <code data-page-node-id="6rIzBKdE0howtAg4EZ5trH">unique=True</code> 自动生成的约束名未必叫 <code data-page-node-id="BCBq6UVcJsiu9MYnvDSoDF">username_UNIQUE</code>，这个判断本身就不牢靠。</p>
+<p data-page-node-id="4ZIMoyLV3QsRfMf7gOqaAj"><strong data-page-node-id="pV1F0hoBDJlGbQbvqK0uxA">修法：</strong>加收藏前先判断是否已收藏（`crud/favorite.py` 里已经有 `is_news_favorite()` 可以直接用），业务层面拦掉；异常处理器按表名分支而不是按约束名猜。</p>
+
+<h4 data-page-node-id="6e81Vmsp0RSMnx1gSWiqwC"><span class="sev p0" data-page-node-id="IHECeaGPqTlMQBzVpTXZji">P0-3</span>数据库密码明文硬编码 + SQL 日志全量打印</h4>
+<p data-page-node-id="uSacIeeOTHJtmuODWMuvVd"><strong data-page-node-id="xBZZxdCdt8yI9Jl40ySYCW">文件：</strong><span class="file" data-page-node-id="WrHjtr0NtpMglxMeZIgSjy">config/db_conf.py</span></p>
+<pre data-page-node-id="sPtaCcFrFxJq1Ykw6oqCOg"><code data-page-node-id="mOZU7W8hvJg7rp2bACysBu">ASYNC_DATABASE_URL = os.getenv("DATABASE_URL",
+    "mysql+aiomysql://root:<em data-page-node-id="UlL0GkIWBNn26ghRbMGkc4">真实密码</em>@localhost:3306/news_app?charset=utf8mb4")   <span class="cmt" data-page-node-id="f7RiWKwsWXOJuVUTobIAWu"># ← 兜底值就是生产密码</span>
+async_engine = create_async_engine(..., echo=True)   <span class="cmt" data-page-node-id="48EpAUwG8biIH7628DH8zy"># ← 每条 SQL 都打到控制台，含参数</span></code></pre>
+<p data-page-node-id="wEZ23DJ5bczkuJJcnvVMjp">用 <code data-page-node-id="r7I8oYL2FbJkb9dQ1rlst1">os.getenv</code> 的思路是对的，但「默认值兜底」等于把密码写死在仓库里——一旦代码推到 Git 就等于泄露。<code data-page-node-id="y4rVai4lqAxkfogdE8Ywyd">echo=True</code> 在开发时很方便，但生产会拖慢性能，并且把 SQL 参数（可能含手机号）写进日志。</p>
+<p data-page-node-id="qJNBGoLt7GKTgm329BeCjp"><strong data-page-node-id="pGLZe2SmgQi4VEoUBnGN2L">修法：</strong>去掉默认值，让环境变量缺失时直接启动失败；<code data-page-node-id="tQ556dhSMYId5Jf1YIMA35">echo</code> 跟随一个 <code data-page-node-id="CLso1EMW7eg5E0Fqv7mRA1">DEBUG</code> 环境变量。同时把已经写进 Git 的密码轮换掉（改密码，不只是删代码）。</p>
+
+<h4 data-page-node-id="bSdm9zIGhE7VgaW2Oyxnmy"><span class="sev p0" data-page-node-id="C0xy5c54UNN817rnhGCBZ6">P0-4</span>CORS 全开放 + 允许携带凭证</h4>
+<p data-page-node-id="Bem8JWCPLC0v2AfOOBU9iq"><strong data-page-node-id="tNfcIY8J4oO9hQhw6X3HJE">文件：</strong><span class="file" data-page-node-id="vuLFiCCEhUSVveJXhXNPNs">main.py</span></p>
+<pre data-page-node-id="LVjTdo3t5b2JHPhsKDumwH"><code data-page-node-id="LQp1drIRtARlCGEWNrhugm">allow_origins=["*"], allow_credentials=True</code></pre>
+<p data-page-node-id="Evqy59m5naCwVhO2MJK71X">开发阶段图方便可以理解，但要清楚它意味着<strong data-page-node-id="7iuQFvdG2YAjg68Q1M8UvX">任何网站都能带着用户的凭证访问你的接口</strong>。上线前必须换成前端的具体域名白名单。同时建议把 token 认证方式确认一下是放 header 而不是 Cookie——放 header 时 CSRF 风险天然更低。</p>
+
+<h3 data-page-node-id="o2CGQGCCthHsM1mFj5k12K">P1 · 结构性问题</h3>
+
+<h4 data-page-node-id="CsLUSWrsSCMPB2h0v14lHV"><span class="sev p1" data-page-node-id="CbWdYGIc3kKZT7ffqG8R2A">P1-1</span>models 里定义了 4 个 Base，且携带字段不一致</h4>
+<p data-page-node-id="CSoNvF0PEkf6Kg2ywUxfUz">四个模型文件各自 <code data-page-node-id="5mdICl4OJKgDUNbRhQ5AvB">class Base(DeclarativeBase)</code>，导致 4 套独立的 <code data-page-node-id="Epfw5eFY3sHF1iyXWhAr7b">metadata</code>。更麻烦的是 <span class="file" data-page-node-id="pzLzrzY7yDoDZBAGkC16F7">models/news.py</span> 的 Base 带 <code data-page-node-id="NpYbUef2lJdXH0RAEc6Dar">created_at</code>/<code data-page-node-id="RKsGCDDfLPW5QDmeBiAqxB">updated_at</code>，其它三个是空的——于是 <code data-page-node-id="YZXl1SNHOuL9hozmuZB84B">Category</code> 会凭空多出两列，<code data-page-node-id="Z1dlaQdefvjaUUQsEbNNGX">Favorite</code> 没有。后续想写统一的建表/迁移脚本时会很难办。</p>
+<p data-page-node-id="DaVGhpLDpA4pPCks0BGvs0"><strong data-page-node-id="7gVR7vJrlqb9EOCRwUxFot">修法：</strong>新建 <span class="file" data-page-node-id="6hDWTQR6qZLL6S9ddRiPwn">models/base.py</span> 定义一个 <code data-page-node-id="1EzEKxZEWpGGLizk35ZhMd">Base</code>（把公共字段决定清楚），其余四个文件 <code data-page-node-id="VK4oEwzly3S1gBiM4A7Wep">from models.base import Base</code>。</p>
+
+<h4 data-page-node-id="XLI2t38PgNExBq0DPf4kpm"><span class="sev p1" data-page-node-id="IdWggoMOzilkXQvdfeGqKa">P1-2</span>crud/news.py 与 crud/news_cache.py 大量重复</h4>
+<p data-page-node-id="bT9mjwC3qUhSRQvq9EdAfM">两个文件几乎一模一样，<span class="file" data-page-node-id="i9q5yyn8mGhu5wQBDwmUCm">routers/news.py</span> 同时 import 两个，导致「取新闻列表」有两条实现路径。更隐蔽的问题是<strong data-page-node-id="yZO7CDcRX6zoCEc5Z3oiJL">两者的返回结构不一致</strong>：</p>
+<ul data-page-node-id="EJWAZUJ7k4moHMjRppVXGA">
+  <li data-page-node-id="ppd6Kr03y3msF6tmjQRDlB"><code data-page-node-id="toyVV6LSebcIR7ZNI0V6jT">crud/news.py</code> 的 <code data-page-node-id="1wA8oKybQ0qJP0EuxiPbkx">get_related_news()</code> 返回含 <code data-page-node-id="v8NHGKis9oF7PnFbWfs452">content</code> 的全字段字典（且是列表推导式里现拼的）</li>
+  <li data-page-node-id="b4NHwou3GFOHRf2dVYd2XJ"><code data-page-node-id="KlDmYpzmjj1BI0qLf6keYB">crud/news_cache.py</code> 的 <code data-page-node-id="L1RTdm1t2xgEvtlCZlTNjs">get_related_news()</code> 返回 <code data-page-node-id="GemfxittC3XQCiq4Fe3dUP">RelatedNewsResponse</code> 只有 4 个字段</li>
+</ul>
+<p data-page-node-id="xbuvrXMd4DaIwqNFdmhnCA">目前路由用的是后者，所以前者里除了 <code data-page-node-id="hbfSsE4lQw5KgdzjSfCMH5">get_news_count</code> 和 <code data-page-node-id="wnrR9hirIgoBF7NL65CqLA">increase_news_views</code>，其余函数实际上已经是<strong data-page-node-id="0KagtPUuDclZpFn1YZyUKJ">死代码</strong>。</p>
+<p data-page-node-id="9eSX1t8RVbDK9AEiDCKv0p"><strong data-page-node-id="es80RIsxfdj1D6DeR1PcbS">修法：</strong>保留 <code data-page-node-id="knTeOJqJrbiWXTy38AZekO">news_cache.py</code>，把其中缓存逻辑做成可开关的（比如给函数加一个 <code data-page-node-id="EtqfdVYiHPIgktCTRovcPx">use_cache: bool = True</code> 参数），删掉重复文件。或者在 <code data-page-node-id="O22bDJfPaD6pFyPq88XJ26">crud/news.py</code> 里直接调用带缓存版，避免同一个功能两套实现。</p>
+
+<h4 data-page-node-id="XoattKVfUW8LA3eRZW33y6"><span class="sev p1" data-page-node-id="HkcTLgE63C7hRjswooZCHP">P1-3</span>响应格式两种风格并存</h4>
+<p data-page-node-id="xu433LOKr9njYa9Eqo8Ymz"><span class="file" data-page-node-id="7rwRZKyjc1CxOi9Fp7pAwF">routers/news.py</span> 手写 <code data-page-node-id="6q203rJqXPDmVNAXvce9lh">{"code": 200, ...}</code>，其它三个路由用 <code data-page-node-id="J3NHEEdGvUgczQdes0gZBR">success_response()</code>；序列化上 news 用手写 <code data-page-node-id="yLiZE1shOpSAo8coSAYAIX">_news_to_dict()</code>，favorite/history 交给 Pydantic 模型。输出一致但维护成本高——将来要给所有响应加一个 <code data-page-node-id="ljfo0qpiUgf3ngPhmAJrSN">timestamp</code> 字段，就得改两个地方，还容易漏。</p>
+<p data-page-node-id="BHCxH77Ejs8jiP2RbDcYSt"><strong data-page-node-id="4NyFkbY98UsJX634sCXzoE">修法：</strong>统一改用 <code data-page-node-id="7SHJ1wZt1VvbWl1cusgpsT">success_response()</code> + Pydantic 响应模型（其实 <code data-page-node-id="PNEgHzy4761OZaqv1E91w8">schemas/news.py</code> 里已经有 <code data-page-node-id="A2bKPP14N6keONby5Ccr3K">NewsDetailResponse</code> 了，只是路由没用上）。</p>
+
+<h4 data-page-node-id="jVJOjNsEg1nIE0P4htvjv0"><span class="sev p1" data-page-node-id="F8Jkilrdjr5ZXHfYHVFwWa">P1-4</span>索引命名有误导性</h4>
+<pre data-page-node-id="BkqJuwiQZlU6K5sG4FZnVT"><code data-page-node-id="8yiAR9lT9rJaW0BICqIxZV">Index("username_UNIQUE", "username")   <span class="cmt" data-page-node-id="FvZeKPH03K8NwZmUgCzl6N"># 名字里有 UNIQUE，但它只是普通索引！</span></code></pre>
+<p data-page-node-id="E6L9F5s2qIoahu4XAYPKDT">真正的唯一性来自列上的 <code data-page-node-id="XwcsOB46mnplMDYrxJE89G">unique=True</code>，而不是这个索引名。同理 <code data-page-node-id="r3KBlWNGFGCTQeM0OtoIsG">token_UNIQUE</code> 也是。这会让后来看代码的人误以为索引提供了唯一保证。另外这属于<strong data-page-node-id="mijGUkcxBwpEAg66iNUFpV">重复约束</strong>（<code data-page-node-id="tu10SDL7gGNBsjScWHkrfR">unique=True</code> 已经自动建了唯一索引，再建一个普通索引是浪费）。</p>
+<p data-page-node-id="LHoB7hmWTTK15swhiWzElH"><strong data-page-node-id="aG5UK1Mdw8xWXrnxygngjm">修法：</strong>删掉这两个多余的 <code data-page-node-id="0U2jyZ2RtB4PLyJx3imgfd">Index</code>，或者改名成 <code data-page-node-id="qdQP7CAmRViPu5BhDbLgdj">idx_user_username</code> 这类诚实的名字。</p>
+
+<h4 data-page-node-id="GuSRY9sBiezJ80xlf3XcWE"><span class="sev p1" data-page-node-id="qQGep20rtbCpwFJDPonecH">P1-5</span>缺少 Authorization 头返回 422 而不是 401</h4>
+<p data-page-node-id="2xNYEH2UEbm0A1JZWMzQ3F"><strong data-page-node-id="QwCDEhMG0FlossQOgmWVwP">文件：</strong><span class="file" data-page-node-id="9MFHKwbWl9u3guF2iNmHdu">utils/auth.py</span></p>
+<pre data-page-node-id="KPNnrBBGDoRxPOBCAcviKf"><code data-page-node-id="XQByiSmQHkSmAa523BGRLI">authorization: str = Header(..., alias="Authorization")   <span class="cmt" data-page-node-id="JrahPzPBKzpLyGCDPAJm25"># ... = 必填</span></code></pre>
+<p data-page-node-id="K3KZchbschK0xLtSSgeXxo">必填意味着「没带这个头」会被 FastAPI 当成<strong data-page-node-id="nsrMqzGMbxCCmPxZGxyaDn">参数校验失败</strong>，返回 422 加一堆 schema 细节。而「token 无效」返回 401。前端拦截器通常只处理 401（跳登录页），422 会被当成别的错误。</p>
+<p data-page-node-id="Riz6d9GNDSmWt9shMcJAFN"><strong data-page-node-id="F7uUy8pIAgYitO0DkyQgcB">修法：</strong>改成可选（<code data-page-node-id="5YnWWeJppW4BkbaECVuwKa">Header(None, alias="Authorization")</code>），在函数体里判断为空时主动抛 401，语义就统一了。</p>
+
+<h4 data-page-node-id="R8E2E4PiGgcOT9dp0IbQ0e"><span class="sev p1" data-page-node-id="PoD60fgzWdLYKYMKL1loud">P1-6</span>DEBUG_MODE 硬编码为 True</h4>
+<p data-page-node-id="CvKpIsHi8xojrAeRbbmF6A"><strong data-page-node-id="0K6CobiMsMMndKJBnfsgsY">文件：</strong><span class="file" data-page-node-id="NOGAlDCLi3UpSyeBICyzxo">utils/exception.py</span>。开启时异常响应会带上 <code data-page-node-id="LGETJG32w53CZqvmBJJVXI">traceback</code> 完整堆栈、SQL 错误原文、请求路径——对攻击者是很有价值的信息。教学阶段方便，上线前必须改成读环境变量。</p>
+
+<h3 data-page-node-id="lckdXBspg3qAMhICsDpK1p">P2 · 细节改进</h3>
+
+<table data-page-node-id="HFYgaQbtrfKxHxVTgr8gpc">
+  <thead data-page-node-id="XyVk5RTEhNC2MPU1EPuQF6"><tr data-page-node-id="nU8I5aPCA5HWAJXNQk0n2w"><th style="width:100px" data-page-node-id="MVbHRZefpf7iaEf9SoF1jo">级别</th><th style="width:230px" data-page-node-id="POKhilwwPtO7zitq1KRBxW">位置</th><th data-page-node-id="99DXiivdmQ5cg7BWiF6d0t">问题与建议</th></tr></thead>
+  <tbody data-page-node-id="KDqeIxtNbr6V1uvhy1QbbZ">
+    <tr data-page-node-id="3yMB4tfSHYRCRjOLrxXfNe"><td data-page-node-id="EaqSdZzHOSB7I0QSvx6SCD"><span class="sev p2" data-page-node-id="4Qrid2nXVwnUP1i2T25vVA">P2</span></td><td class="mono" data-page-node-id="r1DXgLl8vySvQfhuOGnS2c">routers/news.py<br data-page-node-id="tc1t1W3oG1HRhuYhzHS8Kq">get_categories</td><td data-page-node-id="U2jvzar9UYrFUYkZVG2QPX">返回的分类字段是 <code data-page-node-id="srTZSOGAAiowvDdp1ATTxd">sort_order</code>（snake_case），其它接口统一 camelCase，前端要写两套取值逻辑。建议统一成 <code data-page-node-id="GPuR2nayQNHsQh2DQUxP78">sortOrder</code>。</td></tr>
+    <tr data-page-node-id="psxnr1jSdpe4bUMlAop3P4"><td data-page-node-id="V4a0yjiFqCjNsFHisKDXbU"><span class="sev p2" data-page-node-id="l1EPl92Fbn9CeL0L0wjlEc">P2</span></td><td class="mono" data-page-node-id="YXLfgSwUTDg3weNBn2lKyN">crud/favorite.py<br data-page-node-id="ISFgRJqOAI8jnLgcawNerF">get_favorite_list</td><td data-page-node-id="pACXKByoZhuP5ZReRy4Ne7"><code data-page-node-id="MqIs3gd2WtQvB5719CBnI0">select(func.count()).where(...)</code> 依赖 SQLAlchemy 从 where 子句反推 FROM，会产生「笛卡尔积」告警。建议显式写 <code data-page-node-id="aZYaNlkJvxVcuV08jTUI91">func.count(Favorite.id)</code>。</td></tr>
+    <tr data-page-node-id="wJFLIdcA08XaENMDmgCAhU"><td data-page-node-id="GOf8lsKvIh4zFRWIcgXMPZ"><span class="sev p2" data-page-node-id="ufuJsfWU0j0RasXAx6dLGL">P2</span></td><td class="mono" data-page-node-id="7ik02yvRsIeFat5NrIMrVt">routers/favorite.py</td><td data-page-node-id="6TvGdBy5AAaLVEAKuxADJQ">用 <code data-page-node-id="ZC9t6Qw4303mSCAx4GBMnh">news.__dict__</code> 构造响应，会把 SQLAlchemy 内部的 <code data-page-node-id="AJ6BGzDg2OH2ZhKgGDhhjY">_sa_instance_state</code> 一起带进去（Pydantic 会忽略，但写法脆弱）。建议显式列出字段，或让 Pydantic 用 <code data-page-node-id="V6cEueYWPEy22NhpST6CRZ">from_attributes</code> 直接从对象取。</td></tr>
+    <tr data-page-node-id="jV4r0k8H2oEwVthCufLVdZ"><td data-page-node-id="CnKsZEpH1gBfkelc110mcY"><span class="sev p2" data-page-node-id="6BotcZpTLraMLDEcUDT0Q0">P2</span></td><td class="mono" data-page-node-id="quHJPcNrCeEGig229OI817">schemas/favorite.py<br data-page-node-id="FCxcDxAeZoReDLyCrU1BNE">schemas/history.py</td><td data-page-node-id="clxKwzkagdj11BzC7WkkDP"><code data-page-node-id="UlILTH3mCdOWRCT1iKKjj7">has_more</code> 的别名是 <code data-page-node-id="DPQ3zZ2Eli2ag7v1P6AZZA">"hasmore"</code>（小写 m），不符合小驼峰风格。虽然前后端已经约定如此，但如果要改，趁项目还小最省事。</td></tr>
+    <tr data-page-node-id="2OjVQlEBCyneH1vDKGBRAK"><td data-page-node-id="CYwG3agOhBMW8TIluToUcm"><span class="sev p2" data-page-node-id="vyxRTf7fMfoJwxe7lNvWio">P2</span></td><td class="mono" data-page-node-id="XBQEtSKs8gQ5soICkP095r">models/ 各文件</td><td data-page-node-id="OnANm2EVpiD3rXuzklOyXn">整个项目所有包目录都<strong data-page-node-id="x09aETbQTdlCBjS1j5luvE">没有 <code data-page-node-id="qmDWWT8Sdg2ibY8a2LduBa">__init__.py</code></strong>（靠 Python 3.3+ 的命名空间包机制运行）。目前能跑，但打包、做类型检查、换工具链时容易出问题。建议补上空的 <code data-page-node-id="KXNjp6cUKj1MBpNEbtCYIb">__init__.py</code>。</td></tr>
+    <tr data-page-node-id="T2m0fLvCuUEKx5LmiWJe3J"><td data-page-node-id="UPERKAnioRtxjZjYr9qIgx"><span class="sev p2" data-page-node-id="Doa4fQRQomo2wBssvuWNFx">P2</span></td><td class="mono" data-page-node-id="eVHMHlhmLQ2PRTU2aIzdlj">crud/users.py</td><td data-page-node-id="LtzGTEiAD0CZMIf5SqttDG"><code data-page-node-id="oQYGsaPEwGrEeU5XlGHqCI">create_user</code> / <code data-page-node-id="zVbrozXMVzAUbZ7i9nMtDk">create_token</code> 内部 <code data-page-node-id="GEwKJZELTc0v2HMsjVJ21b">commit()</code>，而 <code data-page-node-id="OUeOvanyP2iUuIHFmla1Yr">get_db()</code> 收尾时还会再 commit 一次。功能上无害，但<strong data-page-node-id="b5kiDlmW0CHCXYZauOLr4Q">事务边界应该只有一处</strong>。建议统一交给 <code data-page-node-id="9KAXm1sQTuC4RBs8Yz2vOO">get_db()</code>，crud 只负责 <code data-page-node-id="ChmV1Yeb3F1QzbFsXR7LUD">add()</code>。</td></tr>
+    <tr data-page-node-id="NjW23NbsnktakvRnddv9us"><td data-page-node-id="aE3DolO1mxEMlDsMLqBtvj"><span class="sev p2" data-page-node-id="2XQqtl82kfXMItqXv5OFxi">P2</span></td><td class="mono" data-page-node-id="onAwX6C7CbgBYQtuksMCPi">crud/history.py<br data-page-node-id="q0neQUkJDwSlqMQUQ0lsnC">delete_history</td><td data-page-node-id="Gh6VnCevT51LMWpzm6wZGg">唯一一个没写 <code data-page-node-id="JmN4VVJZWlDCJHQGh0CG8a">commit()</code> 的函数（靠 get_db 兜底）。同文件其它函数都写了，风格不一致，容易让人误以为它会自动提交。</td></tr>
+    <tr data-page-node-id="hAEJUBbm4CF926eRhh9M2B"><td data-page-node-id="PFRM8Dmswardvbw3MrddMy"><span class="sev p2" data-page-node-id="oNOmizWAU1he6Cev9Hd1As">P2</span></td><td class="mono" data-page-node-id="ti1cuy3GgE3hhfx0eECPLA">main.py</td><td data-page-node-id="T2dI7UPRgrGRyPmdDEZiNu">没有 <code data-page-node-id="pk3NIyX6vC2DSsrxEdUxds">Base.metadata.create_all()</code>，表必须手工在 MySQL 里建好才能跑。建议补一个建表入口脚本并写进 README，否则换台机器部署就卡住。</td></tr>
+    <tr data-page-node-id="Qi9DPlW7djAp0FgRPHOGmy"><td data-page-node-id="1Wun8bpf869fyIkEk57Ffz"><span class="sev p2" data-page-node-id="GyvbvwV3yx3322bpsGvprA">P2</span></td><td class="mono" data-page-node-id="qZuvrVtFEN9rtfdULn8Ch9">config/cache_conf.py</td><td data-page-node-id="etr4N914Ruq2vNoCMEBFt4">Redis 连接参数（host/port/db）全部硬编码在源码里，且不支持密码。建议同样是「环境变量 + 无默认值」。</td></tr>
+    <tr data-page-node-id="wQOMD402iN5VcbuFidSD0H"><td data-page-node-id="NCYUEnDqkcWkfmkNQJB5AM"><span class="sev p2" data-page-node-id="Bn39xxgpnSJV2Ewb6V6W0f">P2</span></td><td class="mono" data-page-node-id="ilBQVoBeSdANBrJxBjFoUP">utils/response.py</td><td data-page-node-id="x3iZbxy8GweitlFDZeJOex"><code data-page-node-id="N5pshmi7KRuuXGknSqH8p8">success_response</code> 无条件返回 HTTP 200。这是常见约定（用业务码判断成败），但要确保前端拦截器不依赖 HTTP 状态码，否则会遇到「明明出错却走成功分支」的问题。</td></tr>
+    <tr data-page-node-id="kMSIq6vUlpHuduoVY9Qltx"><td data-page-node-id="S6KIivVglO7Zu0S4AsLlSO"><span class="sev p2" data-page-node-id="wJPn93TQ7eTSEMgQ1lpfMn">P2</span></td><td class="mono" data-page-node-id="t4nFucJTqzMyNpmAzBg3ef">crud/users.py<br data-page-node-id="bVolbgEcvjL6274gLOVKIi">create_token</td><td data-page-node-id="A8nhLOTl6C8ZuShoZRZo9B">token 是 <code data-page-node-id="MVIOFnH3rHnt0cMiYtImik">uuid4</code> 明文入库、固定 7 天、无刷新机制、无签名。学习够用；生产建议用 JWT 或「随机串 + 存哈希」，并支持滑动续期。</td></tr>
+    <tr data-page-node-id="zb06v2dLefNINDrtRyuTmk"><td data-page-node-id="2LLLZPCXHVKQTuceiidQg4"><span class="sev p2" data-page-node-id="SgBErsSTq8aRtnm3Y9DlL1">P2</span></td><td class="mono" data-page-node-id="CnpNZtTkgpkDNNV1MNz1Xg">schemas/users.py</td><td data-page-node-id="PruS1fwf5ZHLs286iGW8ri"><code data-page-node-id="WCXq1Ra9c6Flv2XHycUhcF">UserProfile</code> 类的命名大小写不一致（<code data-page-node-id="zVc7VB78HEfUMRNPW3U8jt">UserinfoResponse</code> 里的 info 是小写 i）。小问题，但既然要改不如一次改整齐。</td></tr>
+  </tbody>
+</table>
+
+<div class="note tip" data-page-node-id="K1XDgSfB3podo8GDn1Ytg0">
+  <span class="lbl" data-page-node-id="SLDf7NnGbngn7R6btu4IwY">一个问题值得单独说：缓存 key 的读写一致性</span>
+  <p data-page-node-id="CPA2koOoUi3ZmZgVeRB9Xj"><span class="file" data-page-node-id="fd3r0hqxXmlpEfWET77sVL">cache/news_cache.py</span> 里 <code data-page-node-id="pjBUJuHCLzJIHLTGerQH6H">set_cache_news_list</code> 和 <code data-page-node-id="aC3GQPibrBcmydCM4GNHpd">get_cache_news_list</code> 各自维护了一份 key 拼接逻辑。任何一边改了（比如把 <code data-page-node-id="GIo6zdZzBhzU8Ibx7BiGZi">"all"</code> 改成 <code data-page-node-id="vX7hL8Di8Ql6XMXQ4i6fG0">"ALL"</code>）都会导致缓存静默失效——<strong data-page-node-id="sXpoY4AB2wVKfstQKHFTtg">接口不报错、数据也对，只是每次都查库</strong>。这类 bug 极难发现。</p>
+  <p data-page-node-id="OTIEBCDUE91Bex2RNwVhHR"><strong data-page-node-id="tpD1dvkXnGV4v0AZesiqbF">建议：</strong>把 key 拼接抽成一个私有函数 <code data-page-node-id="Zv6WxjvurbmR6HympxGc4t">_news_list_key(category_id, page, size)</code>，读写都调它。这样「一致性」就由代码结构保证，而不是靠人记得。</p>
+</div>
+
+<h2 id="s10" data-page-node-id="49hvc9wa7oYUZpVw7B2PF3"><span class="num" data-page-node-id="VjBtt1EZDGlE1ZxywCqIvK">10</span>建议的阅读顺序</h2>
+
+<p data-page-node-id="Gp6o5YKy12m4SeQKh0JIvr">不要从 <code data-page-node-id="yGe2RsekcYbq8Awn5moplM">main.py</code> 一路顺着往下读——那样很容易迷失。推荐按「先跑通一条最细的链路，再横向扩展」的方式：</p>
+
+<table data-page-node-id="CgKbLbia3wx26h6xW6Ad8p">
+  <thead data-page-node-id="PLNQIc9oonKiKgmJgcyzHM"><tr data-page-node-id="Gi2dZsL33BCBt33obuL95e"><th style="width:60px" data-page-node-id="J3WEpuWC7W3yK1Ggp7LhIj">步骤</th><th style="width:230px" data-page-node-id="01AbMHoDZgFfteDwF3WjHF">读哪些文件</th><th data-page-node-id="hlHDcvIihkZBBnE4OdT6fS">带着什么问题读</th></tr></thead>
+  <tbody data-page-node-id="hhKlzypekthRVWugRosqD0">
+    <tr data-page-node-id="Yo6boepiDgpxuibrdDEBmK"><td data-page-node-id="tEpVlJkMDAanxD5GdlJJI4">1</td><td class="mono" data-page-node-id="lsYa2lfFEGMDePBRLIYd4h">main.py</td><td data-page-node-id="g4rdrafuzmLky7VswuCZF2">一个 FastAPI 应用需要哪些零件才能跑起来？为什么注册异常处理器要在挂路由之前？</td></tr>
+    <tr data-page-node-id="UcPQQ6xySvADz3YqsTJKVB"><td data-page-node-id="XSraH9a4g6ywV8h4qv6w6u">2</td><td class="mono" data-page-node-id="Lb38B2ibBxeMI38GCwFTpR">config/db_conf.py</td><td data-page-node-id="9WEFUN1n9KsN9TiiTFkiNt"><code data-page-node-id="5x9Q7WYdE3JHZL0keTVRG5">yield</code> 前后为什么能实现「一个请求一个事务」？连接池解决什么问题？</td></tr>
+    <tr data-page-node-id="fbL6U956qBvRipHLF62wn5"><td data-page-node-id="QtbwXldzGaNvo74ghEaLzX">3</td><td class="mono" data-page-node-id="Q25HmB0xz4tbYwQuHtalbz">models/users.py<br data-page-node-id="KluoOF5kJHsHrrhF3QgGvA">models/news.py</td><td data-page-node-id="8nD5smWf8xTyivHmBzJNgc"><code data-page-node-id="PvJzZOPpLIaKlDNuWF2ui9">Mapped[str]</code> 和 <code data-page-node-id="TWstafRgJGEY7cxyKToBtm">mapped_column()</code> 分别管什么？<code data-page-node-id="KR4FnAheJ2mGxqpZDGJOh5">__table_args__</code> 是干什么的？</td></tr>
+    <tr data-page-node-id="RNFPf17N3wEf1hOkIRO6Gr"><td data-page-node-id="Ecaqk19IXVB4GkHI9p2YAJ">4</td><td class="mono" data-page-node-id="DJCxzYYfFgMoVwUGimf1m1">schemas/users.py<br data-page-node-id="9d3rjJGzOop0PdHPv3KLVG">schemas/base.py</td><td data-page-node-id="cTZs5EjqaaoSBkGL4RMhoX">为什么要有两套「用户」结构？<code data-page-node-id="szqJwR6VsCTkKVCYhNzRBj">alias</code> 和 <code data-page-node-id="boCqx29bqS2lrKRamD9Ufr">from_attributes</code> 各解决什么问题？</td></tr>
+    <tr data-page-node-id="41PbAP8rrcsmaFSVjSdIjM"><td data-page-node-id="AOtxOzmsSuMKnRdA3fQkip">5</td><td class="mono" data-page-node-id="4mYJe92NHWX9U2ZdBVnj5z">utils/security.py<br data-page-node-id="422C1FE9Zjur6oFdiwhdWy">crud/users.py</td><td data-page-node-id="nsBIL3STGQptwOokWW7DpI">bcrypt 为什么不可逆？<code data-page-node-id="GQKQSj7xBshAZmZ0dNDpgR">scalar_one_or_none()</code> 和 <code data-page-node-id="fRlbTgWGDFFYngh9yEVFKX">scalar_one()</code> 的区别？</td></tr>
+    <tr data-page-node-id="DmNNNl8qa6OMU0786NsOAF"><td data-page-node-id="l7dXdstnVbMu0CNwP9M5hQ">6</td><td class="mono" data-page-node-id="lGnR7buOxkcrYUnkNy8o8O">utils/response.py<br data-page-node-id="Dtr4xXD4wmb4iuW8dc52uD">routers/users.py</td><td data-page-node-id="YBnJIQFnKMvqPLWskZOPOF">跟着「注册」这条链路完整走一遍，确认每一步都说得清。</td></tr>
+    <tr data-page-node-id="bvWrXAu9FQGX82JFNK1539"><td data-page-node-id="dfTSWp7AfMFKtqxZL03VVC">7</td><td class="mono" data-page-node-id="GcqonSPt3NF3QWntX5dqhZ">utils/auth.py</td><td data-page-node-id="PqvnHzUSgGrHabkMDpySy1">一个 <code data-page-node-id="3kITrGVG1HvvBAEZqkxVix">Depends</code> 怎么同时做到「必须登录」+「拿到当前用户」？</td></tr>
+    <tr data-page-node-id="Fi454Ll8QS5jAyseSOX0j9"><td data-page-node-id="ZjzPkWcJfbSH4HRUGRjV2f">8</td><td class="mono" data-page-node-id="MR3gr4SudI3FUg5FEUkZgd">routers/news.py<br data-page-node-id="dZSIXvXjEhPM1qtFS96eU8">crud/news.py</td><td data-page-node-id="i0rsXdslCMi2CbRqSDRsYD">先把无缓存版本读懂，注意 <code data-page-node-id="j7XX18vgoQXoMrbwY37t7d">_news_to_dict()</code> 在做什么转换。</td></tr>
+    <tr data-page-node-id="lB7yWBijaSDTlLwVhf8RRO"><td data-page-node-id="ulNzVpOAHTYIsREgyQpgZe">9</td><td class="mono" data-page-node-id="WG47nze72nwhBLow4lYC0s">config/cache_conf.py<br data-page-node-id="LUiyFQXveP9nmOD2KoQtAg">cache/news_cache.py<br data-page-node-id="IHQn2LZNwckZBp8xXyKBqu">crud/news_cache.py</td><td data-page-node-id="XJwQ7IIYkfmFN52isgpkvq">旁路缓存的四步是什么？为什么缓存里的时间要转回 datetime？</td></tr>
+    <tr data-page-node-id="9xSlMcI0TjhQ0LT7RHUoIN"><td data-page-node-id="aZ4DTh5TVcKAPyeXHcRx3X">10</td><td class="mono" data-page-node-id="77CIP7t7138bvkHIgEPnEJ">routers/favorite.py<br data-page-node-id="NwkSoEl2PWFvTghQgaWOE7">crud/favorite.py<br data-page-node-id="HVFfQtvChqC5pKRzgObb4H">routers/history.py<br data-page-node-id="Yc1eWyz5jLbsUAoPCDgftV">crud/history.py</td><td data-page-node-id="R1fTOlOYY0sOSBKF1aGC66">这两套结构高度对称，重点看 <code data-page-node-id="VK7IFW0qIvawOefqFfxJ0G">join</code> 查询和分页返回怎么拼。</td></tr>
+    <tr data-page-node-id="DGJEyF3QcBmoVp1W4EtFew"><td data-page-node-id="V1N2P7d3ZxgRJ2YIAhLW0s">11</td><td class="mono" data-page-node-id="p2qg4aPoe0gqTEznMZ8nFQ">utils/exception.py<br data-page-node-id="S3AwA52QFPycrgUbStQyyx">utils/exception_handlers.py</td><td data-page-node-id="oyAwdFBjLzQFlpl3wlmmW8">注册顺序为什么「子类在前、父类在后」？</td></tr>
+  </tbody>
+</table>
+
+<h3 data-page-node-id="Sc1N1scU4LDDXFQrgI5CSQ">几个可以动手练的点</h3>
+
+<div class="cards" data-page-node-id="0qM6CrXsYkSoUuv9vG0rHr">
+  <div class="card" data-page-node-id="bSfuMLE0kjZt94X2wtossD">
+    <span class="tag" data-page-node-id="jceY0RRsw9Y6bXk0MXdq77">练习 1 · 最简单</span>
+    <h4 data-page-node-id="2kwuOhTnK0SvYqvE9habpK">修掉 P1-5</h4>
+    <p data-page-node-id="15tRbL4WnJ6cddEibtxuze">把 <code data-page-node-id="s3UeKO1TqDlw7LIfe62nhu">utils/auth.py</code> 的 <code data-page-node-id="iEZJbZ7pJo1aySmu9yB8eS">Header(...)</code> 改成可选，不带头时手动抛 401。改完用 <code data-page-node-id="6hA6afatZ6ltBdrQdqOsZP">test_main.http</code> 验证一下响应变化。</p>
+  </div>
+  <div class="card" data-page-node-id="6bLnQ4GPeNlktKDk5LxSJG">
+    <span class="tag" data-page-node-id="fw2HNtZslC6zG68lBlfWo1">练习 2 · 理解分层</span>
+    <h4 data-page-node-id="IlFaRxXWVAQcn0HhkLAoeB">加一个「新闻搜索」接口</h4>
+    <p data-page-node-id="9gXScdx3qh9sg0WUEmp1lE"><code data-page-node-id="q00P0Ki7X1ejcY43BuhC9R">GET /api/news/search?keyword=xxx</code>。完整走一遍 6 个层：模型不用动，schema 加个入参，crud 加个 <code data-page-node-id="5oLgcP04gDugga1kPVfLKF">like</code> 查询，路由加个接口。</p>
+  </div>
+  <div class="card" data-page-node-id="dAj6rDtwDOgZLq6AgPNQgh">
+    <span class="tag" data-page-node-id="NbvFdKX0mpEWtl9exWrCKn">练习 3 · 理解事务</span>
+    <h4 data-page-node-id="x9LSj5OxWkmhb77WGaNBhl">把收藏改成幂等</h4>
+    <p data-page-node-id="e1yEKsPAfBAo9ZxqooATNc">重复收藏时返回「已收藏」而不是报错。在路由层用现成的 <code data-page-node-id="usFR6QO8ncBfMjdwnTAzM0">is_news_favorite()</code> 做判断——顺便把 P0-2 一起解决了。</p>
+  </div>
+  <div class="card" data-page-node-id="iklDNVkIOlDCLCafSdpFTp">
+    <span class="tag" data-page-node-id="JZ2BBXpjimIPZpGEXyGytW">练习 4 · 进阶</span>
+    <h4 data-page-node-id="bZXcNZsTbyzFkrBnXPWn5V">给写操作加缓存失效</h4>
+    <p data-page-node-id="WNfobtVqWC4EL9pPfZREGC">加收藏/改新闻后主动删掉相关缓存 key。这是理解「缓存一致性」最直接的实践。</p>
+  </div>
+</div>
+
+<hr data-page-node-id="kBnXEFiq5SnjShTGIBqL4w">
+<footer data-page-node-id="plQ1KyGskVGUZ2EKcFMJbB">
+  <p data-page-node-id="lz4rKiLqARRa17ItjPr8vP"><strong data-page-node-id="yl8sKhXOfW5aTqrAn3IO6D">关于这份文档</strong>：基于项目当前源码（19 个 Python 文件）通读后整理。「问题与改进建议」这一节的判断依据是代码本身，其中 P0-1（删除历史参数错位）与 P0-2（重复收藏提示错误）属于可复现的逻辑缺陷，建议你先在本地验证一次再动手改。</p>
+  <p data-page-node-id="zL8UBQEFh0XFoPaB0eUKZh">生成时间：2026-09-11</p>
+</footer>
+
+</div>
+</body>
+</html>

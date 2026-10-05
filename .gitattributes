@@ -1,0 +1,35 @@
+# ============================================================
+# 换行符与文件类型策略
+# ------------------------------------------------------------
+# 为什么需要这个文件？
+#   Windows 上写出来的文件是 CRLF，Linux/macOS 是 LF。
+#   如果让 git 自动转换，同一次提交在不同机器上会产生
+#   「整个文件都变了」的假 diff，很难 review。
+#
+# 【最关键的一条】*.bat / *.cmd 必须锁成 CRLF：
+#   cmd.exe 解析 CRLF-only 的批处理没问题，但反过来 ——
+#   如果批处理变成 LF 行尾，call :label / goto 这类结构会出现
+#   难以复现的怪异行为。这个项目的 start-all.bat 依赖这些结构。
+# ============================================================
+
+# 默认：交给 git 判断是否文本文件，仓库内统一存 LF
+* text=auto
+
+# Windows 批处理/脚本：检出时必须是 CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# 二进制文件不做任何换行转换
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.pdf binary
+*.zip binary
